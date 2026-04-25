@@ -8,4 +8,18 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    host: true, // Garante que o Vite escute em 0.0.0.0 (essencial pro Docker)
+    port: 5173,
+    allowedHosts: [
+      'ec2-56-125-109-199.sa-east-1.compute.amazonaws.com', // O host da sua AWS
+      'localhost',
+    ],
+    // Ou, se quiser liberar pra qualquer host em ambiente de desenvolvimento:
+    // allowedHosts: true,
+
+    watch: {
+      usePolling: true, // Importante para o Hot Reload funcionar dentro do Docker
+    },
+  },
 });
