@@ -2,7 +2,15 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Field, Heading, Input, Stack, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Field,
+  Heading,
+  Input,
+  Stack,
+  Text,
+} from '@chakra-ui/react';
 import { loginSchema, type LoginFormData } from './schema/login.schema';
 import { useLogin } from '../../services/auth/queries';
 import { authService } from '../../services/auth/storage';
@@ -35,21 +43,40 @@ export default function LoginPage() {
   }
 
   return (
-    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
       <Box w="full" maxW="sm" p={8} borderWidth={1} borderRadius="lg">
         <Stack gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>
-          <Heading size="lg" textAlign="center">Entrar</Heading>
+          <Heading size="lg" textAlign="center">
+            Entrar
+          </Heading>
 
           <Field.Root invalid={!!errors.email}>
             <Field.Label>E-mail</Field.Label>
-            <Input type="email" placeholder="seu@email.com" {...register('email')} />
-            {errors.email && <Field.ErrorText>{errors.email.message}</Field.ErrorText>}
+            <Input
+              type="email"
+              placeholder="seu@email.com"
+              {...register('email')}
+            />
+            {errors.email && (
+              <Field.ErrorText>{errors.email.message}</Field.ErrorText>
+            )}
           </Field.Root>
 
-          <Field.Root invalid={!!errors.password}>
+          <Field.Root invalid={!!errors.senha}>
             <Field.Label>Senha</Field.Label>
-            <Input type="password" placeholder="••••••" {...register('password')} />
-            {errors.password && <Field.ErrorText>{errors.password.message}</Field.ErrorText>}
+            <Input
+              type="password"
+              placeholder="••••••"
+              {...register('senha')}
+            />
+            {errors.senha && (
+              <Field.ErrorText>{errors.senha.message}</Field.ErrorText>
+            )}
           </Field.Root>
 
           {error && (

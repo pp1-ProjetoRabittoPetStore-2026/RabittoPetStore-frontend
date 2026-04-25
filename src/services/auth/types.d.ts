@@ -1,6 +1,6 @@
 export type Login = {
   email: string;
-  password: string;
+  senha: string;
 };
 
 export type LoginResponse = {
