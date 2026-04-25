@@ -1,11 +1,9 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter, Navigate, Outlet } from 'react-router';
 import { authService } from './services/auth/storage';
 import LoginPage from './pages/login';
 import HomePage from './pages/home';
 import PrivateLayout from './layouts/private-layout';
 import ManagerOrdersPage from './pages/manager/ManagerOrdersPage';
-import StatusPet from './pages/pets/StatusPet';
 
 export function ProtectedRoute() {
   if (!authService.isAuthenticated()) {
@@ -34,7 +32,6 @@ export const router = createBrowserRouter([
         children: [
           { path: '/', element: <HomePage /> },
           { path: '/manager/orders', element: <ManagerOrdersPage /> },
-          { path: '/pets/status', element: <StatusPet /> },
         ],
       },
     ],

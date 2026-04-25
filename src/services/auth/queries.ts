@@ -8,11 +8,12 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (credentials: Login) => {
+      console.log('Logging in with credentials:', credentials);
       const response = await authApi.login(credentials);
       return response;
     },
     onSuccess: (data) => {
-      authService.setToken(data.accessToken); // Salva no localStorage
+      authService.setToken(data.accessToken);
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
