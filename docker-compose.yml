@@ -1,0 +1,14 @@
+services:
+  frontend:
+    build: .
+    container_name: rabitto-petstore-app
+    ports:
+      - '5173:5173'
+    volumes:
+      - .:/app
+      - /app/node_modules # Volume anônimo para as libs instaladas no container
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Necessário para hot reload em alguns sistemas (WSL2/Windows)
+      - VITE_API_URL=http://ec2-56-125-109-199.sa-east-1.compute.amazonaws.com:8080/ # Exemplo de variável que você pode precisar
+    stdin_open: true
+    tty: true
