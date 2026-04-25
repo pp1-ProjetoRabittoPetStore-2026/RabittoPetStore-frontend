@@ -3,7 +3,7 @@ import type { Agendamento, ServicoStatus } from './types';
 
 export const agendamentosApi = {
   getAll: async (): Promise<Agendamento[]> => {
-    const response = await api.get<Agendamento[]>('/agendamentos');
+    const response = await api.get<Agendamento[]>('/agendamentos/status');
     return response.data;
   },
 
