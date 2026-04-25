@@ -3,7 +3,7 @@ import { authService } from './services/auth/storage';
 import LoginPage from './pages/login';
 import HomePage from './pages/home';
 import PrivateLayout from './layouts/private-layout';
-import ManagerOrdersPage from './pages/manager/ManagerOrdersPage';
+import ManagerOrdersPage from './pages/manager/orders';
 
 export function ProtectedRoute() {
   if (!authService.isAuthenticated()) {

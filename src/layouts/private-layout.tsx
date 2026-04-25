@@ -24,6 +24,8 @@ import { authService } from '../services/auth/storage';
 const NAV_ITEMS = [
   { label: 'Principal', path: '/' },
   { label: 'Status dos Serviços', path: '/pets/status' },
+  { label: 'Gerenciar Pedidos', path: '/manager/orders' },
+  { label: 'Gerenciar Empregados', path: '/manager/employee' },
 ];
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {

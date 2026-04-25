@@ -4,8 +4,9 @@ import { authService } from './services/auth/storage';
 import LoginPage from './pages/login';
 import HomePage from './pages/home';
 import PrivateLayout from './layouts/private-layout';
-import ManagerOrdersPage from './pages/manager/ManagerOrdersPage';
+import ManagerOrdersPage from './pages/manager/orders';
 import StatusPet from './pages/pets/StatusPet';
+import EmployeePage from './pages/manager/employee';
 
 export function ProtectedRoute() {
   if (!authService.isAuthenticated()) {
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
           { path: '/', element: <HomePage /> },
           { path: '/manager/orders', element: <ManagerOrdersPage /> },
           { path: '/pets/status', element: <StatusPet /> },
+          { path: '/manager/employee', element: <EmployeePage /> },
         ],
       },
     ],

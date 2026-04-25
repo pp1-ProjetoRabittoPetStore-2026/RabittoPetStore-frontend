@@ -3,13 +3,13 @@ import { ordersApi } from './api';
 import type { Order } from './types';
 
 // Query key for pending orders
-const PENDING_ORDERS_KEY = ['orders', 'pending'];
+const PENDING_ORDERS_KEY = ['Pendente', 'Aguardando', 'Em Serviço', 'Pronto'];
 
 export const usePendingOrders = () => {
   return useQuery({
     queryKey: PENDING_ORDERS_KEY,
     queryFn: ordersApi.getPendingOrders,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 };
 

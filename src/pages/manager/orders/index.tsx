@@ -12,7 +12,7 @@ import {
   usePendingOrders,
   useApproveOrder,
   useRejectOrder,
-} from '../../services/orders/queries';
+} from '../../../services/orders/queries';
 import type { Order } from '@/services/orders/types';
 import { useColorModeValue } from '@/components/ui/color-mode';
 import { toaster } from '@/components/ui/toaster';

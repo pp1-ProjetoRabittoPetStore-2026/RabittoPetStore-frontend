@@ -1,9 +1,5 @@
-import axios from 'axios';
+import api from '../api';
 import type { Agendamento, ServicoStatus } from './types';
-
-const api = axios.create({
-  baseURL: 'http://localhost:8080',
-});
 
 export const agendamentosApi = {
   getAll: async (): Promise<Agendamento[]> => {
