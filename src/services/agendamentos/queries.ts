@@ -12,6 +12,14 @@ export const useAgendamentos = () => {
   });
 };
 
+export const useAgendamentosByStatus = (status: ServicoStatus) => {
+  return useQuery({
+    queryKey: [...AGENDAMENTOS_KEY, status],
+    queryFn: () => agendamentosApi.getByStatus(status),
+    staleTime: 1000 * 30,
+  });
+};
+
 export const useUpdateStatus = () => {
   const queryClient = useQueryClient();
 

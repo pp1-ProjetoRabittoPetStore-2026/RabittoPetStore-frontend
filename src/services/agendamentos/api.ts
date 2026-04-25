@@ -7,6 +7,13 @@ export const agendamentosApi = {
     return response.data;
   },
 
+  getByStatus: async (status: ServicoStatus): Promise<Agendamento[]> => {
+    const response = await api.get<Agendamento[]>(
+      `/agendamentos/status/${status}`,
+    );
+    return response.data;
+  },
+
   updateStatus: async (
     id: number,
     status: ServicoStatus,

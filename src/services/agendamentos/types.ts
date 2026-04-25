@@ -1,4 +1,10 @@
-export type ServicoStatus = 'Pendente' | 'Aguardando' | 'Em Serviço' | 'Pronto';
+export type ServicoStatus =
+  | 'Pendente'
+  | 'Aguardando'
+  | 'Em Serviço'
+  | 'Pronto'
+  | 'Confirmado'
+  | 'Cancelado';
 
 export interface Servico {
   id: number;
