@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import {
   Box,
   Stack,
@@ -6,6 +9,9 @@ import {
   Spinner,
   Button,
   Badge,
+  Portal,
+  Select,
+  createListCollection,
 } from '@chakra-ui/react';
 import { Check, X } from 'lucide-react';
 
@@ -15,29 +21,30 @@ import {
   useAgendamentosByStatus,
   useUpdateStatus,
 } from '@/services/agendamentos/queries';
-import type { Agendamento } from '@/services/agendamentos/types';
+import type { Agendamento, ServicoStatus } from '@/services/agendamentos/types';
 
 export default function ManagerOrdersPage() {
-  // Buscamos apenas os agendamentos com status "Pendente"
+  // Estado para o filtro (Chakra v3 Select usa array de strings para o value)
+  const [statusFilter, setStatusFilter] = useState<string[]>(['Pendente']);
+
+  // Hook de busca usando o status selecionado no filtro
+  const currentStatus = statusFilter[0] as ServicoStatus;
   const {
     data: agendamentos = [],
     isLoading,
     error,
-  } = useAgendamentosByStatus('Pendente');
+  } = useAgendamentosByStatus(currentStatus);
+
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateStatus();
 
-  const handleUpdate = (
-    id: number,
-    newStatus: 'Confirmado' | 'Cancelado',
-    actionLabel: string,
-  ) => {
+  const handleUpdate = (id: number, newStatus: ServicoStatus) => {
     updateStatus(
       { id, status: newStatus },
       {
         onSuccess: () => {
           toaster.create({
-            title: `Agendamento ${actionLabel}`,
-            description: `O status foi atualizado para ${newStatus} com sucesso.`,
+            title: `Sucesso`,
+            description: `Agendamento movido para ${newStatus}.`,
             type: 'success',
           });
         },
@@ -52,60 +59,111 @@ export default function ManagerOrdersPage() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <Box minH="100vh" py={12} px={6} textAlign="center">
-        <Spinner size="lg" />
-        <Text mt={4}>Carregando agendamentos pendentes...</Text>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box minH="100vh" py={12} px={6} textAlign="center">
-        <Text color="red.500" fontSize="xl">
-          Erro ao carregar dados
-        </Text>
-        <Button mt={4} onClick={() => window.location.reload()}>
-          Tentar novamente
-        </Button>
-      </Box>
-    );
-  }
-
-  if (agendamentos.length === 0) {
-    return (
-      <Box minH="100vh" py={12} px={6} textAlign="center">
-        <Text fontSize="2xl">Nenhum agendamento pendente</Text>
-        <Text mt={4} color="gray.500">
-          Todos os pedidos foram processados.
-        </Text>
-      </Box>
-    );
-  }
-
   return (
     <Box minH="100vh" py={12} px={6}>
-      <Stack gap={6}>
-        <Text fontSize="2xl" fontWeight="bold">
-          Agendamentos Pendentes
-        </Text>
-        <Stack gap={4}>
-          {agendamentos.map((item) => (
-            <OrderItem
-              key={item.id}
-              agendamento={item}
-              onApprove={(id) => handleUpdate(id, 'Confirmado', 'aprovado')}
-              onReject={(id) => handleUpdate(id, 'Cancelado', 'rejeitado')}
-              isUpdating={isUpdating}
-            />
-          ))}
-        </Stack>
+      <Stack gap={8} maxW="800px" mx="auto">
+        {/* Cabeçalho e Filtro */}
+        <Flex
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={4}
+        >
+          <Text fontSize="2xl" fontWeight="bold">
+            Gerenciar Agendamentos
+          </Text>
+
+          <Select.Root
+            collection={statusOptions}
+            size="sm"
+            width="240px"
+            value={statusFilter}
+            onValueChange={(details) => setStatusFilter(details.value)}
+          >
+            <Select.Label fontSize="xs" mb={1} color="gray.500">
+              Filtrar por Status
+            </Select.Label>
+            <Select.Control>
+              <Select.Trigger>
+                <Select.ValueText placeholder="Selecione o status" />
+              </Select.Trigger>
+            </Select.Control>
+            <Portal>
+              <Select.Positioner>
+                <Select.Content>
+                  {statusOptions.items.map((item) => (
+                    <Select.Item item={item} key={item.value}>
+                      {item.label}
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Portal>
+          </Select.Root>
+        </Flex>
+
+        {/* Área de Conteúdo */}
+        {isLoading ? (
+          <Box textAlign="center" py={10}>
+            <Spinner size="lg" />
+            <Text mt={4} color="gray.500">
+              Buscando agendamentos...
+            </Text>
+          </Box>
+        ) : error ? (
+          <Box textAlign="center" py={10}>
+            <Text color="red.500">Erro ao carregar dados</Text>
+            <Button
+              mt={4}
+              variant="outline"
+              onClick={() => window.location.reload()}
+            >
+              Tentar novamente
+            </Button>
+          </Box>
+        ) : agendamentos.length === 0 ? (
+          <Box
+            textAlign="center"
+            py={20}
+            borderStyle="dashed"
+            borderWidth="2px"
+            borderRadius="xl"
+          >
+            <Text fontSize="xl" color="gray.500">
+              Nenhum agendamento encontrado
+            </Text>
+            <Text fontSize="sm" color="gray.400">
+              Não há registros com o status "{currentStatus}"
+            </Text>
+          </Box>
+        ) : (
+          <Stack gap={4}>
+            {agendamentos.map((item) => (
+              <OrderItem
+                key={item.id}
+                agendamento={item}
+                onApprove={(id) => handleUpdate(id, 'Aguardando')}
+                onReject={(id) => handleUpdate(id, 'Pronto')}
+                isUpdating={isUpdating}
+              />
+            ))}
+          </Stack>
+        )}
       </Stack>
     </Box>
   );
 }
+
+// Configuração das opções do Select
+const statusOptions = createListCollection({
+  items: [
+    { label: 'Pendente', value: 'Pendente' },
+    { label: 'Aguardando', value: 'Aguardando' },
+    { label: 'Em Serviço', value: 'Em Serviço' },
+    { label: 'Pronto', value: 'Pronto' },
+  ],
+});
 
 interface OrderItemProps {
   agendamento: Agendamento;
@@ -122,8 +180,22 @@ function OrderItem({
 }: OrderItemProps) {
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
-  const textColor = useColorModeValue('gray.800', 'gray.100');
-  const mutedTextColor = useColorModeValue('gray.600', 'gray.400');
+
+  // Cores dinâmicas para o Badge baseadas no status
+  const getBadgePalette = (status: string) => {
+    switch (status) {
+      case 'Pendente':
+        return 'yellow';
+      case 'Aguardando':
+        return 'blue';
+      case 'Em Serviço':
+        return 'orange';
+      case 'Pronto':
+        return 'green';
+      default:
+        return 'gray';
+    }
+  };
 
   return (
     <Box
@@ -133,56 +205,63 @@ function OrderItem({
       borderColor={borderColor}
       p={6}
       shadow="sm"
+      transition="transform 0.2s"
+      _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
     >
       <Flex alignItems="center" justifyContent="space-between" mb={4}>
         <Box>
-          <Text fontSize="lg" fontWeight="bold" color={textColor}>
+          <Text fontSize="lg" fontWeight="bold">
             Pet: {agendamento.pet.nome}
           </Text>
-          <Text fontSize="sm" color={mutedTextColor}>
+          <Text fontSize="sm" color="gray.500">
             {new Date(agendamento.dataHora).toLocaleString('pt-BR')} •{' '}
-            {agendamento.pet.raca} ({agendamento.pet.porte})
+            {agendamento.pet.raca}
           </Text>
         </Box>
-        <Badge colorPalette="yellow">{agendamento.status}</Badge>
+        <Badge colorPalette={getBadgePalette(agendamento.status)}>
+          {agendamento.status}
+        </Badge>
       </Flex>
 
       <Stack gap={3} borderTopWidth="1px" pt={4} borderColor={borderColor}>
         <Flex justifyContent="space-between" alignItems="center">
           <Box>
             <Text fontWeight="medium">{agendamento.servico.nome}</Text>
-            <Text fontSize="sm" color={mutedTextColor}>
-              {agendamento.servico.descricao}
+            <Text fontSize="xs" color="gray.500">
+              Preço do serviço
             </Text>
           </Box>
-          <Text fontWeight="bold" fontSize="lg">
+          <Text fontWeight="bold" fontSize="lg" color="green.600">
             R$ {agendamento.servico.preco.toFixed(2)}
           </Text>
         </Flex>
 
-        <Flex gap={3} mt={2}>
-          <Button
-            onClick={() => onApprove(agendamento.id)}
-            loading={isUpdating}
-            colorPalette="green"
-            flex={1}
-            size="sm"
-          >
-            <Check size={16} style={{ marginRight: '8px' }} />
-            Aprovar
-          </Button>
-          <Button
-            onClick={() => onReject(agendamento.id)}
-            loading={isUpdating}
-            variant="outline"
-            colorPalette="red"
-            flex={1}
-            size="sm"
-          >
-            <X size={16} style={{ marginRight: '8px' }} />
-            Rejeitar
-          </Button>
-        </Flex>
+        {/* Só exibe botões de ação se o status for Pendente */}
+        {agendamento.status === 'Pendente' && (
+          <Flex gap={3} mt={2}>
+            <Button
+              onClick={() => onApprove(agendamento.id)}
+              loading={isUpdating}
+              colorPalette="green"
+              flex={1}
+              size="sm"
+            >
+              <Check size={16} style={{ marginRight: '8px' }} />
+              Aprovar
+            </Button>
+            <Button
+              onClick={() => onReject(agendamento.id)}
+              loading={isUpdating}
+              variant="outline"
+              colorPalette="red"
+              flex={1}
+              size="sm"
+            >
+              <X size={16} style={{ marginRight: '8px' }} />
+              Rejeitar
+            </Button>
+          </Flex>
+        )}
       </Stack>
     </Box>
   );

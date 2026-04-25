@@ -2,8 +2,25 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Pencil, Trash2, Plus, X, ShieldAlert } from 'lucide-react';
-import './Employee.css';
+import { Pencil, Trash2, Plus, ShieldAlert } from 'lucide-react';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Text,
+  Table,
+  Badge,
+  IconButton,
+  Dialog,
+  Input,
+  Field,
+  Stack,
+  createListCollection,
+  HStack,
+  Spinner,
+} from '@chakra-ui/react';
+
 import {
   useCreateEmployee,
   useDeactivateEmployee,
@@ -16,6 +33,7 @@ import {
   type Role,
 } from '@/services/employee/types';
 
+// Esquema de validação
 const employeeSchema = z.object({
   nome: z.string().min(2, 'Nome muito curto'),
   cargo: z.string().min(1, 'Selecione um cargo'),
@@ -26,7 +44,14 @@ const employeeSchema = z.object({
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
 
-const roles: Role[] = ['GERENTE', 'CAIXA', 'TOSADOR', 'VETERINARIO'];
+const roles = createListCollection({
+  items: [
+    { label: 'Gerente', value: 'GERENTE' },
+    { label: 'Caixa', value: 'CAIXA' },
+    { label: 'Tosador', value: 'TOSADOR' },
+    { label: 'Veterinário', value: 'VETERINARIO' },
+  ],
+});
 
 export default function EmployeePage() {
   const { data: employees, isLoading } = useEmployees();
@@ -67,255 +92,249 @@ export default function EmployeePage() {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   const onSubmit = (data: EmployeeFormData) => {
-    if (editingEmployee && editingEmployee.id) {
+    if (editingEmployee) {
       updateMutation.mutate(
         {
-          id: editingEmployee.id,
+          id: editingEmployee.id!,
           data: { ...data, ativo: editingEmployee.ativo },
         },
-        { onSuccess: () => setIsModalOpen(false) },
+        {
+          onSuccess: () => setIsModalOpen(false),
+        },
       );
-    } else {
-      createMutation.mutate(data, { onSuccess: () => setIsModalOpen(false) });
+      return;
     }
-  };
 
-  const handleDeactivate = (id?: number) => {
-    if (
-      id &&
-      confirm(
-        'Tem certeza que deseja desativar este funcionário? O acesso ao sistema será revogado.',
-      )
-    ) {
-      deactivateMutation.mutate(id);
-    }
+    createMutation.mutate(data, {
+      onSuccess: () => setIsModalOpen(false),
+    });
   };
 
   return (
-    <div className="employee-page-container">
-      <header className="employee-page-header">
-        <div>
-          <h1>Equipe & Acessos</h1>
-          <p>
-            Gerencie funcionários, cargos e permissões de acesso ao sistema.
-          </p>
-        </div>
-        <button className="btn btn-primary" onClick={openCreateModal}>
-          <Plus size={18} />
-          <span>Novo Funcionário</span>
-        </button>
-      </header>
+    <Box p="8" maxW="1280px" mx="auto">
+      {/* Header */}
+      <Flex justify="space-between" align="center" mb="8">
+        <Box>
+          <Heading size="xl" color="gray.800">
+            Equipe & Acessos
+          </Heading>
+          <Text color="gray.500">
+            Gerencie funcionários, cargos e permissões do sistema.
+          </Text>
+        </Box>
+        <Button colorPalette="blue" onClick={openCreateModal} gap="2">
+          <Plus size={18} /> Novo Funcionário
+        </Button>
+      </Flex>
 
-      <div className="table-container">
-        {isLoading ? (
-          <div className="loading-state">Carregando dados...</div>
-        ) : (
-          <table className="employee-table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Cargo</th>
-                <th>CPF</th>
-                <th>Telefone</th>
-                <th>Status</th>
-                <th className="actions-header">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees?.map((emp) => (
-                <tr key={emp.id} className={!emp.ativo ? 'inactive-row' : ''}>
-                  <td className="emp-name">
-                    <div className="avatar">
-                      {emp.nome.charAt(0).toUpperCase()}
-                    </div>
-                    <span>{emp.nome}</span>
-                  </td>
-                  <td>
-                    <span
-                      className={`badge badge-role badge-${emp.cargo.toLowerCase()}`}
-                    >
-                      {emp.cargo}
-                    </span>
-                  </td>
-                  <td>{emp.cpf}</td>
-                  <td>{emp.telefone}</td>
-                  <td>
-                    {emp.ativo ? (
-                      <span className="badge badge-active">Ativo</span>
-                    ) : (
-                      <span className="badge badge-inactive">Inativo</span>
-                    )}
-                  </td>
-                  <td className="actions-cell">
-                    <button
-                      className="icon-btn edit-btn"
-                      onClick={() => openEditModal(emp)}
-                      title="Editar"
-                    >
-                      <Pencil size={18} />
-                    </button>
-                    <button
-                      className="icon-btn delete-btn"
-                      onClick={() => handleDeactivate(emp.id)}
-                      disabled={!emp.ativo}
-                      title={
-                        emp.ativo ? 'Desativar Acesso' : 'Conta Desativada'
-                      }
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {(!employees || employees.length === 0) && (
-                <tr>
-                  <td colSpan={6} className="empty-state">
-                    Nenhum funcionário cadastrado.
-                  </td>
-                </tr>
+      {/* Tabela com Sticky Header (Chakra v3 Pattern) */}
+      <Box rounded="xl" overflow="hidden" bg={'#09090B'}>
+        <Table.ScrollArea h="600px">
+          <Table.Root size="md" stickyHeader>
+            <Table.Header>
+              <Table.Row>
+                <Table.ColumnHeader>Nome</Table.ColumnHeader>
+                <Table.ColumnHeader>Cargo</Table.ColumnHeader>
+                <Table.ColumnHeader>CPF</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader textAlign="end">Ações</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {isLoading ? (
+                <Table.Row>
+                  <Table.Cell colSpan={5} textAlign="center" py="10">
+                    <Spinner />
+                  </Table.Cell>
+                </Table.Row>
+              ) : (
+                employees?.map((emp) => (
+                  <Table.Row key={emp.id} opacity={emp.ativo ? 1 : 0.6}>
+                    <Table.Cell>
+                      <HStack gap="3">
+                        <Box
+                          w="9"
+                          h="9"
+                          rounded="full"
+                          bg="purple.500"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          fontWeight="bold"
+                        >
+                          {emp.nome.charAt(0).toUpperCase()}
+                        </Box>
+                        <Text fontWeight="medium">{emp.nome}</Text>
+                      </HStack>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Badge
+                        variant="subtle"
+                        colorPalette={getRoleColor(emp.cargo)}
+                      >
+                        {emp.cargo}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell>{emp.cpf}</Table.Cell>
+                    <Table.Cell>
+                      <Badge
+                        variant="solid"
+                        colorPalette={emp.ativo ? 'green' : 'red'}
+                      >
+                        {emp.ativo ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </Table.Cell>
+                    <Table.Cell textAlign="end">
+                      <HStack gap="2" justify="flex-end">
+                        <IconButton
+                          variant="ghost"
+                          colorPalette="blue"
+                          onClick={() => openEditModal(emp)}
+                        >
+                          <Pencil size={18} />
+                        </IconButton>
+                        <IconButton
+                          variant="ghost"
+                          colorPalette="red"
+                          disabled={!emp.ativo}
+                          onClick={() => deactivateMutation.mutate(emp.id!)}
+                        >
+                          <Trash2 size={18} />
+                        </IconButton>
+                      </HStack>
+                    </Table.Cell>
+                  </Table.Row>
+                ))
               )}
-            </tbody>
-          </table>
-        )}
-      </div>
+            </Table.Body>
+          </Table.Root>
+        </Table.ScrollArea>
+      </Box>
 
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div
-            className="modal-content glass-effect"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <h2>
+      {/* Modal Refatorado para Dialog do Chakra v3 */}
+      <Dialog.Root
+        open={isModalOpen}
+        onOpenChange={(e) => setIsModalOpen(e.open)}
+      >
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content rounded="2xl" p="6">
+            <Dialog.Header>
+              <Dialog.Title fontSize="xl">
                 {editingEmployee ? 'Editar Perfil' : 'Cadastrar Funcionário'}
-              </h2>
-              <button className="close-btn" onClick={closeModal}>
-                <X size={20} />
-              </button>
-            </div>
+              </Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <form id="employee-form" onSubmit={handleSubmit(onSubmit)}>
+                <Stack gap="4">
+                  <Field.Root invalid={!!errors.nome}>
+                    <Field.Label>Nome Completo</Field.Label>
+                    <Input
+                      {...register('nome')}
+                      placeholder="Ex: Maria Oliveira"
+                    />
+                    <Field.ErrorText>{errors.nome?.message}</Field.ErrorText>
+                  </Field.Root>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="employee-form">
-              <div className="form-group">
-                <label>Nome Completo</label>
-                <input
-                  type="text"
-                  {...register('nome')}
-                  placeholder="Ex: Maria Oliveira"
-                />
-                {errors.nome && (
-                  <span className="error-text">{errors.nome.message}</span>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label>Cargo & Nível de Acesso</label>
-                <select {...register('cargo')}>
-                  <option value="">Selecione o cargo do funcionário</option>
-                  {roles.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-                {errors.cargo && (
-                  <span className="error-text">{errors.cargo.message}</span>
-                )}
-
-                {selectedRole && ROLE_PERMISSIONS[selectedRole] && (
-                  <div className="permissions-box">
-                    <div className="permissions-header">
-                      <ShieldAlert size={14} />
-                      <span>Permissões Concedidas:</span>
-                    </div>
-                    <div className="permissions-list">
-                      {ROLE_PERMISSIONS[selectedRole].map((perm) => (
-                        <span key={perm} className="permission-tag">
-                          {perm}
-                        </span>
+                  <Field.Root invalid={!!errors.cargo}>
+                    <Field.Label>Cargo</Field.Label>
+                    <select
+                      {...register('cargo')}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        borderRadius: '6px',
+                      }}
+                    >
+                      <option value="">Selecione o cargo</option>
+                      {roles.items.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.label}
+                        </option>
                       ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+                    </select>
+                    <Field.ErrorText>{errors.cargo?.message}</Field.ErrorText>
+                  </Field.Root>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label>CPF</label>
-                  <input
-                    type="text"
-                    {...register('cpf')}
-                    placeholder="000.000.000-00"
-                  />
-                  {errors.cpf && (
-                    <span className="error-text">{errors.cpf.message}</span>
+                  {selectedRole && ROLE_PERMISSIONS[selectedRole] && (
+                    <Box p="3" rounded="md">
+                      <HStack
+                        color="blue.700"
+                        mb="2"
+                        fontSize="xs"
+                        fontWeight="bold"
+                      >
+                        <ShieldAlert size={14} /> <Text>PERMISSÕES:</Text>
+                      </HStack>
+                      <HStack flexWrap="wrap" gap="1">
+                        {ROLE_PERMISSIONS[selectedRole].map((perm) => (
+                          <Badge key={perm} size="sm" variant="outline">
+                            {perm}
+                          </Badge>
+                        ))}
+                      </HStack>
+                    </Box>
                   )}
-                </div>
-                <div className="form-group">
-                  <label>Telefone</label>
-                  <input
-                    type="text"
-                    {...register('telefone')}
-                    placeholder="(00) 00000-0000"
-                  />
-                  {errors.telefone && (
-                    <span className="error-text">
-                      {errors.telefone.message}
-                    </span>
-                  )}
-                </div>
-              </div>
 
-              <div className="form-group">
-                <label>
-                  Senha de Acesso{' '}
-                  {editingEmployee && (
-                    <span className="optional">(Opcional)</span>
-                  )}
-                </label>
-                <input
-                  type="password"
-                  {...register('senha')}
-                  placeholder="******"
-                />
-                {errors.senha && (
-                  <span className="error-text">{errors.senha.message}</span>
-                )}
-                <small className="help-text">
-                  {editingEmployee
-                    ? 'Deixe em branco para manter a senha atual.'
-                    : 'Esta senha será usada pelo funcionário para acessar o sistema.'}
-                </small>
-              </div>
+                  <HStack gap="4">
+                    <Field.Root invalid={!!errors.cpf}>
+                      <Field.Label>CPF</Field.Label>
+                      <Input
+                        {...register('cpf')}
+                        placeholder="000.000.000-00"
+                      />
+                    </Field.Root>
+                    <Field.Root invalid={!!errors.telefone}>
+                      <Field.Label>Telefone</Field.Label>
+                      <Input
+                        {...register('telefone')}
+                        placeholder="(81) 99999-9999"
+                      />
+                    </Field.Root>
+                  </HStack>
 
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={closeModal}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={
-                    createMutation.isPending || updateMutation.isPending
-                  }
-                >
-                  {createMutation.isPending || updateMutation.isPending
-                    ? 'Salvando...'
-                    : 'Salvar Funcionário'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+                  <Field.Root invalid={!!errors.senha}>
+                    <Field.Label>
+                      Senha {editingEmployee && '(Opcional)'}
+                    </Field.Label>
+                    <Input type="password" {...register('senha')} />
+                    <Field.HelperText fontSize="xs">
+                      {editingEmployee
+                        ? 'Deixe vazio para manter'
+                        : 'Senha de acesso inicial'}
+                    </Field.HelperText>
+                  </Field.Root>
+                </Stack>
+              </form>
+            </Dialog.Body>
+            <Dialog.Footer mt="6">
+              <Dialog.CloseTrigger asChild>
+                <Button variant="outline">Cancelar</Button>
+              </Dialog.CloseTrigger>
+              <Button
+                type="submit"
+                form="employee-form"
+                colorPalette="blue"
+                loading={createMutation.isPending || updateMutation.isPending}
+              >
+                Salvar Funcionário
+              </Button>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
+    </Box>
   );
 }
+
+// Helper para cores de badge
+const getRoleColor = (role: string) => {
+  const colors: Record<string, string> = {
+    GERENTE: 'purple',
+    CAIXA: 'blue',
+    VETERINARIO: 'green',
+    TOSADOR: 'orange',
+  };
+  return colors[role] || 'gray';
+};
