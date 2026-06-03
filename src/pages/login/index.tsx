@@ -27,7 +27,7 @@ const inputStyles = {
     borderColor: tokens.accent,
     boxShadow: `0 0 0 3px ${tokens.accentGlow}`,
   },
-  _placeholder: { color: 'oklch(0.38 0.005 264)' },
+  _placeholder: { color: 'oklch(0.58 0.04 80)' },
 };
 
 export default function LoginPage() {
@@ -89,7 +89,7 @@ export default function LoginPage() {
           right="-80px"
           w="320px"
           h="320px"
-          background="radial-gradient(circle, oklch(0.78 0.16 60 / 0.06) 0%, transparent 70%)"
+          background="radial-gradient(circle, oklch(0.73 0.08 65 / 0.10) 0%, transparent 70%)"
           pointerEvents="none"
         />
 
@@ -98,7 +98,7 @@ export default function LoginPage() {
           fontSize={{ base: '28px', md: '36px' }}
           lineHeight="1"
           userSelect="none"
-          filter="drop-shadow(0 0 16px oklch(0.78 0.16 60 / 0.55))"
+          filter="drop-shadow(0 0 16px oklch(0.73 0.08 65 / 0.45))"
         >
           🐾
         </Text>

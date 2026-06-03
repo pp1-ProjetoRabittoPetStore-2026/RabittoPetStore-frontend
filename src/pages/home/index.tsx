@@ -92,15 +92,20 @@ function NavItem({ to, label, description }: NavItemProps) {
       px="2"
       mx="-2"
       borderBottom="1px solid"
-      borderColor="oklch(0.12 0.015 264)"
+      borderColor={tokens.panelBorder}
       textDecoration="none"
       borderRadius="sm"
-      _hover={{ bg: 'oklch(0.09 0.015 264)' }}
+      _hover={{ bg: tokens.panelBg }}
       _last={{ borderBottom: 'none' }}
       transition="background 120ms ease-out"
     >
       <Stack gap="0.5" flex="1">
-        <Text fontWeight="600" fontSize="14px" color={tokens.textPrimary} lineHeight="1.3">
+        <Text
+          fontWeight="600"
+          fontSize="14px"
+          color={tokens.textPrimary}
+          lineHeight="1.3"
+        >
           {label}
         </Text>
         <Text fontSize="12px" color={tokens.textMuted} lineHeight="1.4">
@@ -118,13 +123,14 @@ export default function HomePage() {
   const { data: employees, isLoading: loadingEmp } = useEmployees();
   const { data: agendamentos, isLoading: loadingAg } = useAgendamentos();
 
-  const todayCount = agendamentos?.filter((a) => isToday(a.dataHora)).length ?? 0;
-  const activeEmp  = employees?.filter((e) => e.ativo !== false).length ?? 0;
-  const inProgress = agendamentos?.filter((a) => a.status === 'Em Serviço').length ?? 0;
+  const todayCount =
+    agendamentos?.filter((a) => isToday(a.dataHora)).length ?? 0;
+  const activeEmp = employees?.filter((e) => e.ativo !== false).length ?? 0;
+  const inProgress =
+    agendamentos?.filter((a) => a.status === 'Em Serviço').length ?? 0;
 
   return (
-    <Stack gap="0" maxW="680px">
-
+    <Stack gap="0">
       <Box pb="10">
         <Heading
           fontSize={{ base: '26px', md: '32px' }}
@@ -150,14 +156,22 @@ export default function HomePage() {
         as="hr"
         border="none"
         borderTop="1px solid"
-        borderColor="oklch(0.14 0.02 264)"
+        borderColor={tokens.panelBorder}
         mb="10"
       />
 
-      <Grid templateColumns="repeat(3, 1fr)" gap={{ base: '8', md: '12' }} pb="14">
-        <StatBlock label="Hoje"         value={todayCount} loading={loadingAg} />
-        <StatBlock label="Funcionários" value={activeEmp}  loading={loadingEmp} />
-        <StatBlock label="Em serviço"   value={inProgress}  loading={loadingAg} />
+      <Grid
+        templateColumns="repeat(3, 1fr)"
+        gap={{ base: '8', md: '12' }}
+        pb="14"
+      >
+        <StatBlock label="Hoje" value={todayCount} loading={loadingAg} />
+        <StatBlock
+          label="Funcionários"
+          value={activeEmp}
+          loading={loadingEmp}
+        />
+        <StatBlock label="Em serviço" value={inProgress} loading={loadingAg} />
       </Grid>
 
       <Box>
@@ -190,7 +204,6 @@ export default function HomePage() {
           />
         </Stack>
       </Box>
-
     </Stack>
   );
 }

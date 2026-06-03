@@ -51,8 +51,8 @@ function NavLink({ label, path, icon: Icon, onClick }: NavLinkProps) {
       color={isActive ? tokens.accent : tokens.textMuted}
       fontWeight={isActive ? '600' : '400'}
       fontSize="sm"
-      bg={isActive ? 'oklch(0.78 0.16 60 / 0.1)' : 'transparent'}
-      _hover={{ color: tokens.textPrimary, bg: 'oklch(0.22 0.06 264)' }}
+      bg={isActive ? 'oklch(0.73 0.08 65 / 0.12)' : 'transparent'}
+      _hover={{ color: tokens.textPrimary, bg: 'oklch(0.73 0.08 65 / 0.08)' }}
       transition="color 120ms ease-out, background 120ms ease-out"
       whiteSpace="nowrap"
     >
@@ -106,7 +106,7 @@ export default function PrivateLayout() {
             size="sm"
             display={{ base: 'inline-flex', md: 'none' }}
             color={tokens.textMuted}
-            _hover={{ color: tokens.textPrimary, bg: 'oklch(0.22 0.06 264)' }}
+            _hover={{ color: tokens.textPrimary, bg: 'oklch(0.73 0.08 65 / 0.08)' }}
             onClick={() => setDrawerOpen(true)}
           >
             <Menu size={18} />
@@ -117,7 +117,7 @@ export default function PrivateLayout() {
               fontSize="17px"
               lineHeight="1"
               userSelect="none"
-              filter="drop-shadow(0 0 8px oklch(0.78 0.16 60 / 0.5))"
+              filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.4))"
             >
               🐾
             </Text>
@@ -182,7 +182,7 @@ export default function PrivateLayout() {
             <DrawerBody p="5">
               <Flex justify="space-between" align="center" mb="8">
                 <HStack gap="2">
-                  <Text fontSize="18px" filter="drop-shadow(0 0 8px oklch(0.78 0.16 60 / 0.5))">
+                  <Text fontSize="18px" filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.4))">
                     🐾
                   </Text>
                   <Text fontWeight="800" fontSize="15px" color={tokens.accent} letterSpacing="-0.3px">
@@ -194,7 +194,7 @@ export default function PrivateLayout() {
                   variant="ghost"
                   size="sm"
                   color={tokens.textMuted}
-                  _hover={{ color: tokens.textPrimary, bg: 'oklch(0.22 0.06 264)' }}
+                  _hover={{ color: tokens.textPrimary, bg: 'oklch(0.73 0.08 65 / 0.08)' }}
                   onClick={() => setDrawerOpen(false)}
                 >
                   <X size={16} />

@@ -14,11 +14,11 @@ product
 
 ## Brand
 
-**Black & Gold Elegance**
+**Golden Summer Fields**
 
-Palette: Black (#000000), Prussian Blue (#14213d), Gold (#fca311), Alabaster Grey (#e5e5e5), White (#ffffff).
+Palette: Dry Sage (#ccd5ae), Beige (#e9edc9), Cornsilk (#fefae0), Papaya Whip (#faedcd), Light Bronze (#d4a373).
 
-Tone: Authoritative, clean, professional. The gold accent signals action and priority. Deep navy and black convey gravity and trust. Not playful, not consumer-app cheerful.
+Tone: Warm, calm, professional. Bronze accent signals action and priority. Muted olive-greens and golden beige convey clarity without harshness. Not playful, not consumer-app cheerful.
 
 ## Anti-References
 
@@ -31,5 +31,5 @@ Tone: Authoritative, clean, professional. The gold accent signals action and pri
 
 - Clarity over cleverness. Staff need to get in and get to work.
 - Consistency is an affordance. Same patterns, same vocabulary, screen to screen.
-- Gold accent reserved for primary actions only. Not decoration.
-- Dark theme. The palette earns it; the context (focused, purposeful work environment) confirms it.
+- Bronze accent reserved for primary actions only. Not decoration.
+- Light theme. Warm and legible in bright office environments.

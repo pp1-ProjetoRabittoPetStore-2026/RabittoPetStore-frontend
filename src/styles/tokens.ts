@@ -1,28 +1,27 @@
-/** Brand color tokens — Black & Gold Elegance palette.
- *  Use these for dark surfaces and semantic colors across all pages.
- *  For the gold accent scale, use colorPalette="brand" on Chakra components.
+/** Brand color tokens — Golden Summer Fields palette.
+ *  Warm muted olive-greens and golden beige; Light Bronze accent for primary actions.
  */
 export const tokens = {
   // Surfaces
-  pageBg:      'oklch(0.06 0.02 264)',
-  panelBg:     '#14213d',
-  panelBorder: 'oklch(0.28 0.05 264)',
+  pageBg:      '#fefae0',                // Cornsilk — page background
+  panelBg:     '#faedcd',                // Papaya Whip — cards, panels, nav
+  panelBorder: '#e9edc9',                // Beige — dividers, borders
 
   // Inputs
-  inputBg:     'oklch(0.11 0.03 264)',
-  inputBorder: 'oklch(0.24 0.05 264)',
+  inputBg:     '#faedcd',                // Papaya Whip — slight depth vs page bg
+  inputBorder: '#ccd5ae',                // Dry Sage — warm visible border
 
   // Text
-  textPrimary: 'oklch(0.97 0.003 264)',
-  textMuted:   'oklch(0.50 0.006 264)',
+  textPrimary: 'oklch(0.20 0.03 80)',    // dark warm brown (derived)
+  textMuted:   'oklch(0.40 0.05 80)',    // medium warm brown (derived)
 
-  // Accent (gold)
-  accent:      '#fca311',
-  accentGlow:  'oklch(0.78 0.16 60 / 0.22)',
+  // Accent (Light Bronze)
+  accent:      '#d4a373',
+  accentGlow:  'oklch(0.73 0.08 65 / 0.25)',
 
   // Error
-  errorText:    'oklch(0.65 0.22 25)',
-  errorSurface: 'oklch(0.65 0.22 25 / 0.07)',
-  errorBorder:  'oklch(0.65 0.22 25 / 0.30)',
-  errorGlow:    'oklch(0.65 0.22 25 / 0.18)',
+  errorText:    'oklch(0.55 0.22 25)',
+  errorSurface: 'oklch(0.55 0.22 25 / 0.07)',
+  errorBorder:  'oklch(0.55 0.22 25 / 0.30)',
+  errorGlow:    'oklch(0.55 0.22 25 / 0.18)',
 } as const;
