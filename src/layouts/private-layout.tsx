@@ -1,67 +1,71 @@
 import { useState } from 'react';
+import { Link as RouterLink, Outlet, useLocation, useNavigate } from 'react-router';
 import {
   Box,
-  Button,
   DrawerBackdrop,
   DrawerBody,
-  DrawerCloseTrigger,
   DrawerContent,
-  DrawerHeader,
   DrawerPositioner,
   DrawerRoot,
   Flex,
-  Heading,
   HStack,
   IconButton,
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { Menu } from 'lucide-react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Activity, Calendar, Home, LogOut, Menu, Users, X } from 'lucide-react';
 import { useLogout } from '../services/auth/queries';
 import { authService } from '../services/auth/storage';
+import { tokens } from '../styles/tokens';
 
 const NAV_ITEMS = [
-  { label: 'Principal', path: '/' },
-  { label: 'Status dos Serviços', path: '/pets/status' },
-  { label: 'Gerenciar Pedidos', path: '/manager/orders' },
-  { label: 'Gerenciar Empregados', path: '/manager/employee' },
+  { label: 'Principal',       path: '/',                 icon: Home },
+  { label: 'Agendamentos',    path: '/manager/orders',   icon: Calendar },
+  { label: 'Funcionários',    path: '/manager/employee', icon: Users },
+  { label: 'Status dos Pets', path: '/pets/status',      icon: Activity },
 ];
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+interface NavLinkProps {
+  label: string;
+  path: string;
+  icon: React.ElementType;
+  onClick?: () => void;
+}
 
-  function handleGoTo(path: string) {
-    navigate(path);
-    onNavigate?.();
-  }
+function NavLink({ label, path, icon: Icon, onClick }: NavLinkProps) {
+  const location = useLocation();
+  const isActive = location.pathname === path;
 
   return (
-    <Stack gap={2}>
-      {NAV_ITEMS.map((item) => {
-        const isActive = location.pathname === item.path;
-
-        return (
-          <Button
-            key={item.path}
-            variant={isActive ? 'solid' : 'ghost'}
-            justifyContent="flex-start"
-            onClick={() => handleGoTo(item.path)}
-            colorPalette={isActive ? 'blue' : undefined}
-          >
-            {item.label}
-          </Button>
-        );
-      })}
-    </Stack>
+    <Box
+      as={RouterLink}
+      to={path}
+      onClick={onClick}
+      display="flex"
+      alignItems="center"
+      gap="2"
+      px="3"
+      py="2"
+      borderRadius="lg"
+      textDecoration="none"
+      color={isActive ? tokens.accent : tokens.textMuted}
+      fontWeight={isActive ? '600' : '400'}
+      fontSize="sm"
+      bg={isActive ? 'oklch(0.78 0.16 60 / 0.1)' : 'transparent'}
+      _hover={{ color: tokens.textPrimary, bg: 'oklch(0.22 0.06 264)' }}
+      transition="color 120ms ease-out, background 120ms ease-out"
+      whiteSpace="nowrap"
+    >
+      <Icon size={15} />
+      {label}
+    </Box>
   );
 }
 
 export default function PrivateLayout() {
   const navigate = useNavigate();
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const { mutate: logout, isPending } = useLogout();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   function handleLogout() {
     logout(undefined, {
@@ -73,67 +77,139 @@ export default function PrivateLayout() {
   }
 
   return (
-    <Flex minH="100vh" direction="column" bg="bg.subtle">
+    <Flex
+      direction="column"
+      minH="100vh"
+      bg={tokens.pageBg}
+      fontFamily="Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    >
+      {/* Navbar */}
       <Flex
-        h={16}
-        px={{ base: 4, md: 6 }}
+        as="header"
+        h="56px"
+        px={{ base: '4', md: '6' }}
         align="center"
         justify="space-between"
-        borderBottomWidth="1px"
-        bg="bg"
+        bg={tokens.panelBg}
+        borderBottom="1px solid"
+        borderColor={tokens.panelBorder}
+        position="sticky"
+        top="0"
+        zIndex="10"
+        flexShrink="0"
       >
-        <HStack gap={3}>
+        {/* Logo + hamburger */}
+        <HStack gap="3">
           <IconButton
             aria-label="Abrir menu"
             variant="ghost"
+            size="sm"
             display={{ base: 'inline-flex', md: 'none' }}
-            onClick={() => setIsDrawerOpen(true)}
+            color={tokens.textMuted}
+            _hover={{ color: tokens.textPrimary, bg: 'oklch(0.22 0.06 264)' }}
+            onClick={() => setDrawerOpen(true)}
           >
             <Menu size={18} />
           </IconButton>
-          <Heading size="md">RabittoPetStore</Heading>
+
+          <HStack gap="2" as={RouterLink} to="/" textDecoration="none">
+            <Text
+              fontSize="17px"
+              lineHeight="1"
+              userSelect="none"
+              filter="drop-shadow(0 0 8px oklch(0.78 0.16 60 / 0.5))"
+            >
+              🐾
+            </Text>
+            <Text fontWeight="800" fontSize="15px" color={tokens.accent} letterSpacing="-0.3px">
+              Rabitto
+            </Text>
+          </HStack>
         </HStack>
 
-        <Button onClick={handleLogout} loading={isPending} size="sm">
-          Sair
-        </Button>
-      </Flex>
+        {/* Desktop nav links */}
+        <HStack gap="1" display={{ base: 'none', md: 'flex' }}>
+          {NAV_ITEMS.map((item) => (
+            <NavLink key={item.path} {...item} />
+          ))}
+        </HStack>
 
-      <Flex flex={1} overflow="hidden">
+        {/* Logout */}
         <Box
-          w="64"
-          borderRightWidth="1px"
-          p={4}
-          bg="bg"
-          display={{ base: 'none', md: 'block' }}
+          as="button"
+          onClick={handleLogout}
+          display="flex"
+          alignItems="center"
+          gap="2"
+          px="3"
+          py="2"
+          borderRadius="lg"
+          fontSize="13px"
+          fontWeight="500"
+          color={tokens.textMuted}
+          bg="transparent"
+          border="none"
+          cursor={isPending ? 'not-allowed' : 'pointer'}
+          opacity={isPending ? 0.5 : 1}
+          _hover={{ color: tokens.errorText }}
+          transition="color 120ms ease-out"
+          fontFamily="inherit"
         >
-          <Text fontSize="sm" color="fg.muted" mb={3}>
-            Navegacao
-          </Text>
-          <SidebarContent />
-        </Box>
-
-        <Box flex={1} p={{ base: 4, md: 6 }} overflow="auto">
-          <Outlet />
+          <LogOut size={14} />
+          <Text display={{ base: 'none', sm: 'block' }} fontSize="13px">Sair</Text>
         </Box>
       </Flex>
 
+      {/* Content */}
+      <Box flex="1" overflow="auto" p={{ base: '5', md: '8' }}>
+        <Outlet />
+      </Box>
+
+      {/* Mobile drawer */}
       <DrawerRoot
-        open={isDrawerOpen}
+        open={drawerOpen}
         placement="start"
-        onOpenChange={(details) => setIsDrawerOpen(details.open)}
+        onOpenChange={(d) => setDrawerOpen(d.open)}
       >
         <DrawerBackdrop />
         <DrawerPositioner>
-          <DrawerContent>
-            <DrawerHeader>
-              <HStack justify="space-between" w="full">
-                <Text fontWeight="semibold">Menu</Text>
-                <DrawerCloseTrigger />
-              </HStack>
-            </DrawerHeader>
-            <DrawerBody>
-              <SidebarContent onNavigate={() => setIsDrawerOpen(false)} />
+          <DrawerContent
+            bg={tokens.panelBg}
+            borderRight="1px solid"
+            borderColor={tokens.panelBorder}
+            maxW="260px"
+          >
+            <DrawerBody p="5">
+              <Flex justify="space-between" align="center" mb="8">
+                <HStack gap="2">
+                  <Text fontSize="18px" filter="drop-shadow(0 0 8px oklch(0.78 0.16 60 / 0.5))">
+                    🐾
+                  </Text>
+                  <Text fontWeight="800" fontSize="15px" color={tokens.accent} letterSpacing="-0.3px">
+                    Rabitto
+                  </Text>
+                </HStack>
+                <IconButton
+                  aria-label="Fechar menu"
+                  variant="ghost"
+                  size="sm"
+                  color={tokens.textMuted}
+                  _hover={{ color: tokens.textPrimary, bg: 'oklch(0.22 0.06 264)' }}
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  <X size={16} />
+                </IconButton>
+              </Flex>
+
+              <Stack gap="1">
+                {NAV_ITEMS.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    {...item}
+                    onClick={() => setDrawerOpen(false)}
+                  />
+                ))}
+              </Stack>
             </DrawerBody>
           </DrawerContent>
         </DrawerPositioner>
