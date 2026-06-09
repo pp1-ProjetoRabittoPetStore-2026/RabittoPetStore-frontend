@@ -7,6 +7,7 @@ import PrivateLayout from './layouts/private-layout';
 import ManagerOrdersPage from './pages/manager/orders';
 import StatusPet from './pages/pets/StatusPet';
 import EmployeePage from './pages/manager/employee';
+import ManagerAgendaPage from './pages/manager/agenda';
 
 export function ProtectedRoute() {
   if (!authService.isAuthenticated()) {
@@ -37,6 +38,7 @@ export const router = createBrowserRouter([
           { path: '/manager/orders', element: <ManagerOrdersPage /> },
           { path: '/pets/status', element: <StatusPet /> },
           { path: '/manager/employee', element: <EmployeePage /> },
+          { path: '/manager/agenda', element: <ManagerAgendaPage /> },
         ],
       },
     ],

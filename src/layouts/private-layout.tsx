@@ -13,7 +13,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { Activity, Calendar, Home, LogOut, Menu, Users, X } from 'lucide-react';
+import { Activity, Calendar, CalendarDays, Home, LogOut, Menu, Users, X } from 'lucide-react';
 import { useLogout } from '../services/auth/queries';
 import { authService } from '../services/auth/storage';
 import { tokens } from '../styles/tokens';
@@ -21,6 +21,7 @@ import { tokens } from '../styles/tokens';
 const NAV_ITEMS = [
   { label: 'Principal',       path: '/',                 icon: Home },
   { label: 'Agendamentos',    path: '/manager/orders',   icon: Calendar },
+  { label: 'Agenda',          path: '/manager/agenda',   icon: CalendarDays },
   { label: 'Funcionários',    path: '/manager/employee', icon: Users },
   { label: 'Status dos Pets', path: '/pets/status',      icon: Activity },
 ];

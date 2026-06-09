@@ -32,6 +32,7 @@ import {
   type Employee,
   type Role,
 } from '@/services/employee/types';
+import { tokens } from '@/styles/tokens';
 
 // Esquema de validação
 const employeeSchema = z.object({
@@ -129,16 +130,32 @@ export default function EmployeePage() {
       </Flex>
 
       {/* Tabela com Sticky Header (Chakra v3 Pattern) */}
-      <Box rounded="xl" overflow="hidden" bg={'#09090B'}>
+      <Box
+        rounded="xl"
+        overflow="hidden"
+        bg={tokens.panelBg}
+        borderWidth="1px"
+        borderColor={tokens.panelBorder}
+        color={tokens.textPrimary}
+      >
         <Table.ScrollArea h="600px">
-          <Table.Root size="md" stickyHeader>
+          <Table.Root
+            size="md"
+            stickyHeader
+            bg="transparent"
+            css={{
+              '& td, & th': { bg: 'transparent', borderColor: tokens.panelBorder },
+              '& tbody tr': { bg: 'transparent' },
+              '& tbody tr:hover': { bg: tokens.panelBorder },
+            }}
+          >
             <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>Nome</Table.ColumnHeader>
-                <Table.ColumnHeader>Cargo</Table.ColumnHeader>
-                <Table.ColumnHeader>CPF</Table.ColumnHeader>
-                <Table.ColumnHeader>Status</Table.ColumnHeader>
-                <Table.ColumnHeader textAlign="end">Ações</Table.ColumnHeader>
+              <Table.Row bg={tokens.panelBorder}>
+                <Table.ColumnHeader color={tokens.textMuted}>Nome</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Cargo</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>CPF</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Status</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted} textAlign="end">Ações</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -157,7 +174,8 @@ export default function EmployeePage() {
                           w="9"
                           h="9"
                           rounded="full"
-                          bg="purple.500"
+                          bg={tokens.accent}
+                          color="white"
                           display="flex"
                           alignItems="center"
                           justifyContent="center"
