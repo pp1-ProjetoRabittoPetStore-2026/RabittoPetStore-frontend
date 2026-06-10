@@ -5,6 +5,7 @@ export interface Employee {
   nome: string;
   cargo: Role | string;
   cpf: string;
+  email?: string;
   telefone: string;
   senha?: string;
   ativo?: boolean;

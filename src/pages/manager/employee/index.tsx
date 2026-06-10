@@ -39,6 +39,11 @@ const employeeSchema = z.object({
   nome: z.string().min(2, 'Nome muito curto'),
   cargo: z.string().min(1, 'Selecione um cargo'),
   cpf: z.string().min(11, 'CPF inválido'),
+  email: z
+    .string()
+    .email('E-mail inválido')
+    .optional()
+    .or(z.literal('')),
   telefone: z.string().min(8, 'Telefone inválido'),
   senha: z.string().optional(),
 });
@@ -77,7 +82,7 @@ export default function EmployeePage() {
 
   const openCreateModal = () => {
     setEditingEmployee(null);
-    reset({ nome: '', cargo: '', cpf: '', telefone: '', senha: '' });
+    reset({ nome: '', cargo: '', cpf: '', email: '', telefone: '', senha: '' });
     setIsModalOpen(true);
   };
 
@@ -87,6 +92,7 @@ export default function EmployeePage() {
       nome: emp.nome,
       cargo: emp.cargo,
       cpf: emp.cpf,
+      email: emp.email ?? '',
       telefone: emp.telefone,
       senha: '',
     });
@@ -311,6 +317,19 @@ export default function EmployeePage() {
                       />
                     </Field.Root>
                   </HStack>
+
+                  <Field.Root invalid={!!errors.email}>
+                    <Field.Label>E-mail de acesso</Field.Label>
+                    <Input
+                      type="email"
+                      {...register('email')}
+                      placeholder="funcionario@rabitto.com"
+                    />
+                    <Field.HelperText fontSize="xs">
+                      Usado para login no painel
+                    </Field.HelperText>
+                    <Field.ErrorText>{errors.email?.message}</Field.ErrorText>
+                  </Field.Root>
 
                   <Field.Root invalid={!!errors.senha}>
                     <Field.Label>

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  email: z.string().email('E-mail inválido'),
+  // Back-office aceita e-mail ou CPF como identificador
+  email: z.string().min(3, 'Informe seu e-mail ou CPF'),
   senha: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
 });
 

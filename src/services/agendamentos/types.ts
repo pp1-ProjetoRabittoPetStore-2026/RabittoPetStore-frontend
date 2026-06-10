@@ -4,6 +4,7 @@ export type ServicoStatus =
   | 'Em Serviço'
   | 'Pronto'
   | 'Confirmado'
+  | 'Rejeitado'
   | 'Cancelado';
 
 export interface Servico {

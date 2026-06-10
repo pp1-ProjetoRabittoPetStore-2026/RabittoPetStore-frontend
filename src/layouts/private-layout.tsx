@@ -13,17 +13,23 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { Activity, Calendar, CalendarDays, Home, LogOut, Menu, Users, X } from 'lucide-react';
+import { Activity, Calendar, CalendarDays, Home, LogOut, Menu, Stethoscope, Users, X } from 'lucide-react';
 import { useLogout } from '../services/auth/queries';
-import { authService } from '../services/auth/storage';
+import { authService, type Role } from '../services/auth/storage';
 import { tokens } from '../styles/tokens';
 
-const NAV_ITEMS = [
-  { label: 'Principal',       path: '/',                 icon: Home },
-  { label: 'Agendamentos',    path: '/manager/orders',   icon: Calendar },
-  { label: 'Agenda',          path: '/manager/agenda',   icon: CalendarDays },
-  { label: 'Funcionários',    path: '/manager/employee', icon: Users },
-  { label: 'Status dos Pets', path: '/pets/status',      icon: Activity },
+const ALL_NAV_ITEMS: {
+  label: string;
+  path: string;
+  icon: React.ElementType;
+  roles: Role[];
+}[] = [
+  { label: 'Principal',        path: '/',                 icon: Home,         roles: ['GERENTE', 'CAIXA', 'TOSADOR', 'VETERINARIO'] },
+  { label: 'Agendamentos',     path: '/manager/orders',   icon: Calendar,     roles: ['GERENTE'] },
+  { label: 'Agenda',           path: '/manager/agenda',   icon: CalendarDays, roles: ['GERENTE'] },
+  { label: 'Funcionários',     path: '/manager/employee', icon: Users,        roles: ['GERENTE'] },
+  { label: 'Status dos Pets',  path: '/pets/status',      icon: Activity,     roles: ['GERENTE', 'TOSADOR'] },
+  { label: 'Minhas Consultas', path: '/vet/agenda',       icon: Stethoscope,  roles: ['VETERINARIO'] },
 ];
 
 interface NavLinkProps {
@@ -67,6 +73,11 @@ export default function PrivateLayout() {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { mutate: logout, isPending } = useLogout();
+
+  const role = authService.getRole();
+  const navItems = ALL_NAV_ITEMS.filter(
+    (item) => role != null && item.roles.includes(role),
+  );
 
   function handleLogout() {
     logout(undefined, {
@@ -130,7 +141,7 @@ export default function PrivateLayout() {
 
         {/* Desktop nav links */}
         <HStack gap="1" display={{ base: 'none', md: 'flex' }}>
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <NavLink key={item.path} {...item} />
           ))}
         </HStack>
@@ -203,7 +214,7 @@ export default function PrivateLayout() {
               </Flex>
 
               <Stack gap="1">
-                {NAV_ITEMS.map((item) => (
+                {navItems.map((item) => (
                   <NavLink
                     key={item.path}
                     {...item}

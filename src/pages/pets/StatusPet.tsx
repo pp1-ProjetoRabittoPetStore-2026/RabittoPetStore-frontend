@@ -25,6 +25,9 @@ const STATUS_COLOR: Record<ServicoStatus, string> = {
   Aguardando: 'yellow',
   'Em Serviço': 'blue',
   Pronto: 'green',
+  Confirmado: 'green',
+  Rejeitado: 'red',
+  Cancelado: 'red',
 };
 
 export default function StatusPet() {

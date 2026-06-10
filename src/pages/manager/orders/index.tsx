@@ -144,7 +144,7 @@ export default function ManagerOrdersPage() {
                 key={item.id}
                 agendamento={item}
                 onApprove={(id) => handleUpdate(id, 'Aguardando')}
-                onReject={(id) => handleUpdate(id, 'Pronto')}
+                onReject={(id) => handleUpdate(id, 'Rejeitado')}
                 isUpdating={isUpdating}
               />
             ))}
@@ -192,6 +192,9 @@ function OrderItem({
         return 'orange';
       case 'Pronto':
         return 'green';
+      case 'Rejeitado':
+      case 'Cancelado':
+        return 'red';
       default:
         return 'gray';
     }

@@ -184,12 +184,12 @@ export default function LoginPage() {
                   color={tokens.textMuted}
                   letterSpacing="0.3px"
                 >
-                  E-mail
+                  E-mail ou CPF
                 </Field.Label>
                 <Input
-                  type="email"
-                  placeholder="seu@email.com"
-                  autoComplete="email"
+                  type="text"
+                  placeholder="seu@email.com ou CPF"
+                  autoComplete="username"
                   {...inputStyles}
                   {...register('email')}
                 />
