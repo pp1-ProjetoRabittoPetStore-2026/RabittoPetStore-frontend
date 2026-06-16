@@ -5,6 +5,7 @@ import {
   HStack,
   Spinner,
   Stack,
+  Table,
   Text,
 } from '@chakra-ui/react';
 import {
@@ -12,6 +13,7 @@ import {
   useUpdateStatus,
 } from '../../services/agendamentos/queries';
 import type { Agendamento, ServicoStatus } from '@/services/agendamentos/types';
+import { tokens } from '@/styles/tokens';
 
 const STATUS_OPTIONS: ServicoStatus[] = [
   'Pendente',
@@ -52,7 +54,7 @@ export default function StatusPet() {
         gap={4}
       >
         <Spinner size="lg" />
-        <Text color="fg.muted">Carregando serviços...</Text>
+        <Text color={tokens.textMuted}>Carregando serviços...</Text>
       </Flex>
     );
   }
@@ -66,10 +68,10 @@ export default function StatusPet() {
         direction="column"
         gap={2}
       >
-        <Text fontSize="xl" fontWeight="semibold">
+        <Text fontSize="xl" fontWeight="semibold" color={tokens.textPrimary}>
           Erro ao carregar serviços
         </Text>
-        <Text color="fg.muted">{(error as Error).message}</Text>
+        <Text color={tokens.errorText}>{(error as Error).message}</Text>
       </Flex>
     );
   }
@@ -83,10 +85,10 @@ export default function StatusPet() {
         direction="column"
         gap={2}
       >
-        <Text fontSize="xl" fontWeight="semibold">
+        <Text fontSize="xl" fontWeight="semibold" color={tokens.textPrimary}>
           Nenhum serviço agendado
         </Text>
-        <Text color="fg.muted">
+        <Text color={tokens.textMuted}>
           Não há agendamentos cadastrados no momento.
         </Text>
       </Flex>
@@ -96,95 +98,119 @@ export default function StatusPet() {
   return (
     <Stack gap={6}>
       <Box>
-        <Text fontSize="2xl" fontWeight="bold">
+        <Text fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
           Controle de Serviços
         </Text>
-        <Text color="fg.muted" mt={1}>
+        <Text color={tokens.textMuted} mt={1}>
           Gerencie o status de cada serviço em tempo real.
         </Text>
       </Box>
 
-      <Stack gap={3}>
-        {agendamentos.map((agendamento) => (
-          <AgendamentoCard
-            key={agendamento.id}
-            agendamento={agendamento}
-            onStatusChange={handleStatusChange}
-            isDisabled={isPending}
-          />
-        ))}
-      </Stack>
+      <Box
+        rounded="xl"
+        overflow="hidden"
+        bg={tokens.panelBg}
+        borderWidth="1px"
+        borderColor={tokens.panelBorder}
+        color={tokens.textPrimary}
+        opacity={isPending ? 0.7 : 1}
+        transition="opacity 0.2s"
+      >
+        <Table.ScrollArea>
+          <Table.Root
+            size="md"
+            bg="transparent"
+            css={{
+              '& td, & th': {
+                bg: 'transparent',
+                borderColor: tokens.panelBorder,
+              },
+              '& tbody tr': { bg: 'transparent' },
+              '& tbody tr:hover': { bg: tokens.panelBorder },
+            }}
+          >
+            <Table.Header>
+              <Table.Row bg={tokens.panelBorder}>
+                <Table.ColumnHeader color={tokens.textMuted}>Pet</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Serviço</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Data / Hora</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Status</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted} textAlign="end">Alterar</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {agendamentos.map((agendamento) => (
+                <AgendamentoRow
+                  key={agendamento.id}
+                  agendamento={agendamento}
+                  onStatusChange={handleStatusChange}
+                  isDisabled={isPending}
+                />
+              ))}
+            </Table.Body>
+          </Table.Root>
+        </Table.ScrollArea>
+      </Box>
     </Stack>
   );
 }
 
-interface AgendamentoCardProps {
+interface AgendamentoRowProps {
   agendamento: Agendamento;
   onStatusChange: (agendamento: Agendamento, status: ServicoStatus) => void;
   isDisabled: boolean;
 }
 
-function AgendamentoCard({
+function AgendamentoRow({
   agendamento,
   onStatusChange,
   isDisabled,
-}: AgendamentoCardProps) {
+}: AgendamentoRowProps) {
   const dataHora = new Date(agendamento.dataHora);
 
   return (
-    <Box
-      bg="bg"
-      borderWidth="1px"
-      borderRadius="lg"
-      p={4}
-      opacity={isDisabled ? 0.7 : 1}
-      transition="opacity 0.2s"
-    >
-      <Flex justify="space-between" align="flex-start" wrap="wrap" gap={3}>
-        <Stack gap={0.5} flex={1} minW="0">
-          <HStack gap={2} wrap="wrap">
-            <Text fontWeight="semibold" fontSize="md">
-              {agendamento.pet.nome}
-            </Text>
-            <Text color="fg.muted" fontSize="sm">
-              {agendamento.pet.especie} • {agendamento.pet.raca}
-            </Text>
-          </HStack>
-          <Text fontSize="sm" color="fg.muted">
-            {agendamento.servico.nome}
-          </Text>
-          <Text fontSize="xs" color="fg.subtle">
-            {dataHora.toLocaleDateString('pt-BR')} às{' '}
-            {dataHora.toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </Text>
-        </Stack>
-
-        <Stack gap={2} align="flex-end">
-          <Badge
-            colorPalette={STATUS_COLOR[agendamento.status]}
-            variant="solid"
-            size="md"
-          >
-            {agendamento.status}
-          </Badge>
-
-          <HStack gap={1} wrap="wrap" justify="flex-end">
-            {STATUS_OPTIONS.map((status) => (
-              <StatusButton
-                key={status}
-                label={status}
-                isActive={agendamento.status === status}
-                isDisabled={isDisabled}
-                onClick={() => onStatusChange(agendamento, status)}
-              />
-            ))}
-          </HStack>
-        </Stack>
-      </Flex>
-    </Box>
+    <Table.Row>
+      <Table.Cell>
+        <Text fontWeight="semibold">{agendamento.pet.nome}</Text>
+        <Text color={tokens.textMuted} fontSize="xs">
+          {agendamento.pet.especie} • {agendamento.pet.raca}
+        </Text>
+      </Table.Cell>
+      <Table.Cell>
+        <Text fontSize="sm">{agendamento.servico.nome}</Text>
+      </Table.Cell>
+      <Table.Cell whiteSpace="nowrap">
+        <Text fontSize="sm">{dataHora.toLocaleDateString('pt-BR')}</Text>
+        <Text fontSize="xs" color={tokens.textMuted}>
+          {dataHora.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </Text>
+      </Table.Cell>
+      <Table.Cell>
+        <Badge
+          colorPalette={STATUS_COLOR[agendamento.status]}
+          variant="solid"
+          size="md"
+        >
+          {agendamento.status}
+        </Badge>
+      </Table.Cell>
+      <Table.Cell>
+        <HStack gap={1} wrap="wrap" justify="flex-end">
+          {STATUS_OPTIONS.map((status) => (
+            <StatusButton
+              key={status}
+              label={status}
+              isActive={agendamento.status === status}
+              isDisabled={isDisabled}
+              onClick={() => onStatusChange(agendamento, status)}
+            />
+          ))}
+        </HStack>
+      </Table.Cell>
+    </Table.Row>
   );
 }
 
@@ -215,8 +241,8 @@ function StatusButton({
       borderWidth="1px"
       cursor={isActive || isDisabled ? 'default' : 'pointer'}
       bg={isActive ? `${color}.100` : 'transparent'}
-      borderColor={isActive ? `${color}.400` : 'border'}
-      color={isActive ? `${color}.700` : 'fg.muted'}
+      borderColor={isActive ? `${color}.400` : tokens.inputBorder}
+      color={isActive ? `${color}.700` : tokens.textMuted}
       _hover={
         isActive || isDisabled
           ? {}
