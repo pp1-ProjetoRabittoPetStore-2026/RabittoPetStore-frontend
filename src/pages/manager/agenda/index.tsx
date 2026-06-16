@@ -22,7 +22,6 @@ import {
 
 import { useAgenda } from '@/services/agenda/queries';
 import type { AgendaFuncionario } from '@/services/agenda/types';
-import type { Agendamento } from '@/services/agendamentos/types';
 import { tokens } from '@/styles/tokens';
 
 // yyyy-MM-dd no fuso local (input type=date e @RequestParam LocalDate)
@@ -106,25 +105,54 @@ export default function ManagerAgendaPage() {
             </Text>
           </Box>
         ) : (
-          <Stack gap={6}>
-            {agenda.map((item) => (
-              <FuncionarioAgendaCard
-                key={item.funcionario.id}
-                item={item}
-              />
-            ))}
-          </Stack>
+          <Box
+            rounded="xl"
+            overflow="hidden"
+            bg={tokens.panelBg}
+            borderWidth="1px"
+            borderColor={tokens.panelBorder}
+            color={tokens.textPrimary}
+          >
+            <Table.ScrollArea>
+              <Table.Root
+                size="md"
+                bg="transparent"
+                css={{
+                  '& td, & th': {
+                    bg: 'transparent',
+                    borderColor: tokens.panelBorder,
+                  },
+                  '& tbody tr': { bg: 'transparent' },
+                  '& tbody tr:hover': { bg: tokens.panelBorder },
+                }}
+              >
+                <Table.Header>
+                  <Table.Row bg={tokens.panelBorder}>
+                    <Table.ColumnHeader color={tokens.textMuted}>Funcionário</Table.ColumnHeader>
+                    <Table.ColumnHeader color={tokens.textMuted}>Cargo</Table.ColumnHeader>
+                    <Table.ColumnHeader color={tokens.textMuted}>Atendimentos</Table.ColumnHeader>
+                    <Table.ColumnHeader color={tokens.textMuted}>Horários</Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {agenda.map((item) => (
+                    <FuncionarioRow key={item.funcionario.id} item={item} />
+                  ))}
+                </Table.Body>
+              </Table.Root>
+            </Table.ScrollArea>
+          </Box>
         )}
       </Stack>
     </Box>
   );
 }
 
-interface FuncionarioAgendaCardProps {
+interface FuncionarioRowProps {
   item: AgendaFuncionario;
 }
 
-function FuncionarioAgendaCard({ item }: FuncionarioAgendaCardProps) {
+function FuncionarioRow({ item }: FuncionarioRowProps) {
   const { funcionario, agendamentos } = item;
 
   const isVet = (funcionario.cargo ?? '')
@@ -132,32 +160,19 @@ function FuncionarioAgendaCard({ item }: FuncionarioAgendaCardProps) {
     .includes('veterin');
 
   return (
-    <Box
-      rounded="xl"
-      overflow="hidden"
-      bg={tokens.panelBg}
-      borderWidth="1px"
-      borderColor={tokens.panelBorder}
-      color={tokens.textPrimary}
-    >
-      {/* Cabeçalho do funcionário */}
-      <Flex
-        alignItems="center"
-        justifyContent="space-between"
-        px={6}
-        py={4}
-      >
+    <Table.Row>
+      <Table.Cell>
         <HStack gap={3}>
-          {isVet ? <Stethoscope size={20} /> : <PawPrint size={20} />}
-          <Box>
-            <Text fontSize="lg" fontWeight="bold">
-              {funcionario.nome}
-            </Text>
-            <Text fontSize="sm" color={tokens.textMuted}>
-              {funcionario.cargo}
-            </Text>
-          </Box>
+          {isVet ? <Stethoscope size={18} /> : <PawPrint size={18} />}
+          <Text fontWeight="medium">{funcionario.nome}</Text>
         </HStack>
+      </Table.Cell>
+      <Table.Cell>
+        <Text fontSize="sm" color={tokens.textMuted}>
+          {funcionario.cargo}
+        </Text>
+      </Table.Cell>
+      <Table.Cell>
         <Badge
           variant="subtle"
           colorPalette={agendamentos.length > 0 ? 'blue' : 'gray'}
@@ -165,91 +180,51 @@ function FuncionarioAgendaCard({ item }: FuncionarioAgendaCardProps) {
           {agendamentos.length}{' '}
           {agendamentos.length === 1 ? 'agendamento' : 'agendamentos'}
         </Badge>
-      </Flex>
-
-      {/* Tabela de agendamentos */}
-      {agendamentos.length === 0 ? (
-        <Text
-          fontSize="sm"
-          color={tokens.textMuted}
-          borderTopWidth="1px"
-          borderColor={tokens.panelBorder}
-          px={6}
-          py={4}
-        >
-          Nenhum atendimento agendado para o dia.
-        </Text>
-      ) : (
-        <Table.Root
-          size="md"
-          bg="transparent"
-          css={{
-            '& td, & th': {
-              bg: 'transparent',
-              borderColor: tokens.panelBorder,
-            },
-            '& tbody tr': { bg: 'transparent' },
-            '& tbody tr:hover': { bg: tokens.panelBorder },
-          }}
-        >
-          <Table.Header>
-            <Table.Row bg={tokens.panelBorder}>
-              <Table.ColumnHeader color={tokens.textMuted} w="120px">
-                Hora
-              </Table.ColumnHeader>
-              <Table.ColumnHeader color={tokens.textMuted}>
-                Pet
-              </Table.ColumnHeader>
-              <Table.ColumnHeader color={tokens.textMuted}>
-                Serviço
-              </Table.ColumnHeader>
-              <Table.ColumnHeader color={tokens.textMuted} textAlign="end">
-                Status
-              </Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {agendamentos.map((ag) => (
-              <AgendamentoRow key={ag.id} agendamento={ag} />
-            ))}
-          </Table.Body>
-        </Table.Root>
-      )}
-    </Box>
-  );
-}
-
-function AgendamentoRow({ agendamento }: { agendamento: Agendamento }) {
-  const hora = new Date(agendamento.dataHora).toLocaleTimeString('pt-BR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
-  return (
-    <Table.Row>
+      </Table.Cell>
       <Table.Cell>
-        <HStack gap={1} color={tokens.textMuted}>
-          <Clock size={14} />
-          <Text fontSize="sm" fontWeight="medium">
-            {hora}
+        {agendamentos.length === 0 ? (
+          <Text fontSize="sm" color={tokens.textMuted}>
+            —
           </Text>
-        </HStack>
-      </Table.Cell>
-      <Table.Cell>
-        <Text fontWeight="medium">{agendamento.pet.nome}</Text>
-      </Table.Cell>
-      <Table.Cell>
-        <Text fontSize="sm" color={tokens.textMuted}>
-          {agendamento.servico.nome}
-        </Text>
-      </Table.Cell>
-      <Table.Cell textAlign="end">
-        <Badge variant="subtle" colorPalette={getBadgePalette(agendamento.status)}>
-          {agendamento.status}
-        </Badge>
+        ) : (
+          <HStack gap={2} wrap="wrap">
+            {agendamentos.map((ag) => (
+              <HStack
+                key={ag.id}
+                gap={1}
+                px={2}
+                py={1}
+                rounded="md"
+                borderWidth="1px"
+                borderColor={tokens.panelBorder}
+                color={tokens.textMuted}
+              >
+                <Clock size={12} />
+                <Text fontSize="xs" fontWeight="medium">
+                  {formatHora(ag.dataHora)}
+                </Text>
+                <Text fontSize="xs">· {ag.pet.nome}</Text>
+                <Badge
+                  size="sm"
+                  variant="subtle"
+                  colorPalette={getBadgePalette(ag.status)}
+                >
+                  {ag.status}
+                </Badge>
+              </HStack>
+            ))}
+          </HStack>
+        )}
       </Table.Cell>
     </Table.Row>
   );
+}
+
+function formatHora(dataHora: string): string {
+  return new Date(dataHora).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 function getBadgePalette(status: string): string {
