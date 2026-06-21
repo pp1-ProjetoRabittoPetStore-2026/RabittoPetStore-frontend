@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
+import { isAxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
@@ -18,6 +19,16 @@ import { loginSchema, type LoginFormData } from './schema/login.schema';
 import { useLogin } from '../../services/auth/queries';
 import { authService } from '../../services/auth/storage';
 import { tokens } from '../../styles/tokens';
+
+// Extrai a mensagem de erro padronizada do backend ({ error: string }).
+function getLoginErrorMessage(error: unknown): string {
+  if (isAxiosError(error)) {
+    const apiError = error.response?.data?.error;
+    if (typeof apiError === 'string' && apiError.trim()) return apiError;
+    if (!error.response) return 'Não foi possível conectar ao servidor.';
+  }
+  return 'Credenciais inválidas. Tente novamente.';
+}
 
 const inputStyles = {
   bg: tokens.inputBg,
@@ -253,7 +264,7 @@ export default function LoginPage() {
                   color={tokens.errorText}
                   lineHeight="1.4"
                 >
-                  Credenciais inválidas. Tente novamente.
+                  {getLoginErrorMessage(error)}
                 </Box>
               )}
 

@@ -83,8 +83,7 @@ interface NavItemProps {
 function NavItem({ to, label, description }: NavItemProps) {
   return (
     <Flex
-      as={RouterLink}
-      to={to}
+      asChild
       align="center"
       justify="space-between"
       gap="4"
@@ -99,6 +98,7 @@ function NavItem({ to, label, description }: NavItemProps) {
       _last={{ borderBottom: 'none' }}
       transition="background 120ms ease-out"
     >
+      <RouterLink to={to}>
       <Stack gap="0.5" flex="1">
         <Text
           fontWeight="600"
@@ -115,6 +115,7 @@ function NavItem({ to, label, description }: NavItemProps) {
       <Box color={tokens.textMuted} flexShrink="0">
         <ChevronRight size={14} />
       </Box>
+      </RouterLink>
     </Flex>
   );
 }
