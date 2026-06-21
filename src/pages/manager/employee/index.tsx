@@ -35,7 +35,8 @@ import {
   type Role,
 } from '@/services/employee/types';
 import { tokens } from '@/styles/tokens';
-import { MaskedInput, MASKS } from '@/components/ui/masked-input';
+import { MaskedInput } from '@/components/ui/masked-input';
+import { MASKS } from '@/components/ui/mask-presets';
 
 // Esquema de validação
 const employeeSchema = z
