@@ -139,7 +139,7 @@ function ConsultaRow({ agendamento }: { agendamento: Agendamento }) {
             <Box>
               <Text fontWeight="medium">{agendamento.pet.nome}</Text>
               <Text fontSize="xs" color="gray.500">
-                {agendamento.servico.nome}
+                {agendamento.servicos.map((s) => s.nome).join(', ')}
               </Text>
             </Box>
           </HStack>

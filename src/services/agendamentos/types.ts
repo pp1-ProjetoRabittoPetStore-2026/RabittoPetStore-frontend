@@ -28,5 +28,5 @@ export interface Agendamento {
   dataHora: string;
   status: ServicoStatus;
   pet: Pet;
-  servico: Servico;
+  servicos: Servico[];
 }

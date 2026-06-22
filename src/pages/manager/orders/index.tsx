@@ -229,13 +229,13 @@ function OrderItem({
       <Stack gap={3} borderTopWidth="1px" pt={4} borderColor={borderColor}>
         <Flex justifyContent="space-between" alignItems="center">
           <Box>
-            <Text fontWeight="medium">{agendamento.servico.nome}</Text>
+            <Text fontWeight="medium">{agendamento.servicos.map((s) => s.nome).join(', ')}</Text>
             <Text fontSize="xs" color="gray.500">
               Preço do serviço
             </Text>
           </Box>
           <Text fontWeight="bold" fontSize="lg" color="green.600">
-            R$ {agendamento.servico.preco.toFixed(2)}
+            R$ {agendamento.servicos.reduce((total, s) => total + (s.preco ?? 0), 0).toFixed(2)}
           </Text>
         </Flex>
 

@@ -177,7 +177,7 @@ function AgendamentoRow({
         </Text>
       </Table.Cell>
       <Table.Cell>
-        <Text fontSize="sm">{agendamento.servico.nome}</Text>
+        <Text fontSize="sm">{agendamento.servicos.map((s) => s.nome).join(', ')}</Text>
       </Table.Cell>
       <Table.Cell whiteSpace="nowrap">
         <Text fontSize="sm">{dataHora.toLocaleDateString('pt-BR')}</Text>

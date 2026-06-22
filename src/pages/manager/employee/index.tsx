@@ -134,7 +134,8 @@ export default function EmployeePage() {
     setIsModalOpen(true);
   };
 
-  const onSubmit = ({ confirmarSenha: _confirmarSenha, ...data }: EmployeeFormData) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onSubmit = ({ confirmarSenha: _, ...data }: EmployeeFormData) => {
     if (editingEmployee) {
       updateMutation.mutate(
         {
