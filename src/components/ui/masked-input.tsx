@@ -4,9 +4,12 @@ import { useMask, type MaskOptions } from '@react-input/mask';
 
 export interface MaskedInputProps extends Omit<InputProps, keyof MaskOptions>, MaskOptions {}
 
-// Input do Chakra com máscara via @react-input/mask. O `useMask` controla
-// o DOM e dispara o evento nativo de input, então o ref do RHF (passado via
-// {...register('campo')}) recebe o valor já formatado.
+
+
+
+
+
+
 function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]) {
   return (node: T | null) => {
     for (const ref of refs) {

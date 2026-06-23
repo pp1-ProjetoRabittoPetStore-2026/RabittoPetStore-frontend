@@ -11,13 +11,15 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Interceptor de REQUISIÇÃO: Adiciona o token no Header
+
+
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = authService.getToken();
 
     if (token && config.headers) {
-      // Padrão Bearer Token
+      
+
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -28,18 +30,24 @@ api.interceptors.request.use(
   },
 );
 
-// Interceptor de RESPOSTA: Trata erros globais (ex: 401 Unauthorized)
-//
-// Sessões do back-office (funcionário) são apenas access-token: o backend não
-// emite refresh token para staff. Portanto, em 401 a única ação correta é
-// encerrar a sessão e mandar para o login — sem tentativa de refresh.
+
+
+
+
+
+
+
+
+
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
     const url = error.config?.url ?? '';
 
-    // Ignora os próprios endpoints de auth para não criar loop de redirect.
+    
+
     if (status === 401 && !url.includes('/auth/')) {
       authService.removeToken();
 

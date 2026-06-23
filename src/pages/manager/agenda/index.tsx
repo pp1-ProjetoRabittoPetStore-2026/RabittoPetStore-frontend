@@ -1,5 +1,6 @@
 'use client';
 
+import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
 import {
   Box,
@@ -12,19 +13,24 @@ import {
   HStack,
   Input,
   Table,
+  Portal,
+  Select,
+  createListCollection,
 } from '@chakra-ui/react';
 import {
   CalendarDays,
   Clock,
   PawPrint,
   Stethoscope,
+  Search,
 } from 'lucide-react';
 
 import { useAgenda } from '@/services/agenda/queries';
 import type { AgendaFuncionario } from '@/services/agenda/types';
 import { tokens } from '@/styles/tokens';
 
-// yyyy-MM-dd no fuso local (input type=date e @RequestParam LocalDate)
+
+
 function todayISO(): string {
   const now = new Date();
   const offset = now.getTimezoneOffset() * 60000;
@@ -33,12 +39,28 @@ function todayISO(): string {
 
 export default function ManagerAgendaPage() {
   const [data, setData] = useState<string>(todayISO());
-  const { data: agenda = [], isLoading, error } = useAgenda(data);
+  const [cargo, setCargo] = useState<string[]>(['']);
+  const [status, setStatus] = useState<string[]>(['']);
+  const [nome, setNome] = useState<string>('');
+
+  const {
+    data: agenda = [],
+    isLoading,
+    error,
+  } = useAgenda({
+    data,
+    cargo: cargo[0] || undefined,
+    status: status[0] || undefined,
+    nome: nome || undefined,
+  });
 
   return (
     <Box minH="100vh" py={12} px={6}>
-      <Stack gap={8} maxW="900px" mx="auto">
-        {/* Cabeçalho e seletor de data */}
+      <Helmet>
+        <title>Rabitto Pet Store — Agenda</title>
+      </Helmet>
+      <Stack gap={8}>
+        {}
         <Flex
           justifyContent="space-between"
           alignItems="center"
@@ -69,7 +91,94 @@ export default function ManagerAgendaPage() {
           </HStack>
         </Flex>
 
-        {/* Conteúdo */}
+        {}
+        <Flex wrap="wrap" gap={3} alignItems="flex-end">
+          <HStack
+            gap={2}
+            px={3}
+            rounded="md"
+            borderWidth="1px"
+            borderColor={tokens.inputBorder}
+            bg={tokens.inputBg}
+            width={{ base: 'full', md: '260px' }}
+          >
+            <Search size={16} color={tokens.textMuted} />
+            <Input
+              placeholder="Buscar funcionário..."
+              size="sm"
+              variant="subtle"
+              bg="transparent"
+              border="none"
+              px={0}
+              color={tokens.textPrimary}
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              _focusVisible={{ outline: 'none', boxShadow: 'none' }}
+            />
+          </HStack>
+
+          <Select.Root
+            collection={cargoOptions}
+            size="sm"
+            width="200px"
+            value={cargo}
+            onValueChange={(details) => setCargo(details.value)}
+          >
+            <Select.Control>
+              <Select.Trigger
+                bg={tokens.inputBg}
+                borderColor={tokens.inputBorder}
+                color={tokens.textPrimary}
+              >
+                <Select.ValueText placeholder="Cargo" />
+              </Select.Trigger>
+            </Select.Control>
+            <Portal>
+              <Select.Positioner>
+                <Select.Content>
+                  {cargoOptions.items.map((item) => (
+                    <Select.Item item={item} key={item.value}>
+                      {item.label}
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Portal>
+          </Select.Root>
+
+          <Select.Root
+            collection={statusOptions}
+            size="sm"
+            width="200px"
+            value={status}
+            onValueChange={(details) => setStatus(details.value)}
+          >
+            <Select.Control>
+              <Select.Trigger
+                bg={tokens.inputBg}
+                borderColor={tokens.inputBorder}
+                color={tokens.textPrimary}
+              >
+                <Select.ValueText placeholder="Status" />
+              </Select.Trigger>
+            </Select.Control>
+            <Portal>
+              <Select.Positioner>
+                <Select.Content>
+                  {statusOptions.items.map((item) => (
+                    <Select.Item item={item} key={item.value}>
+                      {item.label}
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Portal>
+          </Select.Root>
+        </Flex>
+
+        {}
         {isLoading ? (
           <Box textAlign="center" py={10}>
             <Spinner size="lg" />
@@ -147,6 +256,27 @@ export default function ManagerAgendaPage() {
     </Box>
   );
 }
+
+const cargoOptions = createListCollection({
+  items: [
+    { label: 'Todos os cargos', value: '' },
+    { label: 'Veterinário', value: 'VETERINARIO' },
+    { label: 'Tosador', value: 'TOSADOR' },
+  ],
+});
+
+const statusOptions = createListCollection({
+  items: [
+    { label: 'Todos os status', value: '' },
+    { label: 'Pendente', value: 'Pendente' },
+    { label: 'Aguardando', value: 'Aguardando' },
+    { label: 'Em Serviço', value: 'Em Serviço' },
+    { label: 'Pronto', value: 'Pronto' },
+    { label: 'Confirmado', value: 'Confirmado' },
+    { label: 'Cancelado', value: 'Cancelado' },
+    { label: 'Rejeitado', value: 'Rejeitado' },
+  ],
+});
 
 interface FuncionarioRowProps {
   item: AgendaFuncionario;

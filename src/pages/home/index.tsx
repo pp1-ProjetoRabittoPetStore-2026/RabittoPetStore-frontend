@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import { Link as RouterLink } from 'react-router';
 import {
   Box,
@@ -132,6 +133,9 @@ export default function HomePage() {
 
   return (
     <Stack gap="0">
+      <Helmet>
+        <title>Rabitto Pet Store — Início</title>
+      </Helmet>
       <Box pb="10">
         <Heading
           fontSize={{ base: '26px', md: '32px' }}

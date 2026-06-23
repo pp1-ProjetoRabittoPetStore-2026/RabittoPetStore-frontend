@@ -1,5 +1,6 @@
+import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { isAxiosError } from 'axios';
@@ -38,7 +39,8 @@ import { tokens } from '@/styles/tokens';
 import { MaskedInput } from '@/components/ui/masked-input';
 import { MASKS } from '@/components/ui/mask-presets';
 
-// Esquema de validação
+
+
 const employeeSchema = z
   .object({
     nome: z.string().min(2, 'Nome muito curto'),
@@ -53,7 +55,8 @@ const employeeSchema = z
     senha: z.string().optional(),
     confirmarSenha: z.string().optional(),
   })
-  // Só valida a confirmação quando uma senha foi informada
+  
+
   .refine((d) => !d.senha || d.senha === d.confirmarSenha, {
     message: 'As senhas não conferem',
     path: ['confirmarSenha'],
@@ -61,8 +64,10 @@ const employeeSchema = z
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
 
-// Extrai a mensagem de erro padronizada do backend ({ error: string }),
-// preservando o erro específico em vez de uma mensagem genérica.
+
+
+
+
 function getApiErrorMessage(error: unknown): string | null {
   if (!error) return null;
   if (isAxiosError(error)) {
@@ -95,13 +100,13 @@ export default function EmployeePage() {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors },
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
   });
 
-  const selectedRole = watch('cargo') as Role;
+  const selectedRole = useWatch({ control, name: 'cargo' }) as Role;
   const submitError = getApiErrorMessage(
     createMutation.error ?? updateMutation.error,
   );
@@ -134,7 +139,8 @@ export default function EmployeePage() {
     setIsModalOpen(true);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
+
   const onSubmit = ({ confirmarSenha: _, ...data }: EmployeeFormData) => {
     if (editingEmployee) {
       updateMutation.mutate(
@@ -155,14 +161,16 @@ export default function EmployeePage() {
   };
 
   return (
-    <Box p="8" maxW="1280px" mx="auto">
-      {/* Header */}
+    <Box p="8">
+      <Helmet>
+        <title>Rabitto Pet Store — Funcionários</title>
+      </Helmet>
       <Flex justify="space-between" align="center" mb="8">
         <Box>
-          <Heading size="xl" color="gray.800">
+          <Heading size="2xl" color={tokens.textPrimary}>
             Equipe & Acessos
           </Heading>
-          <Text color="gray.500">
+          <Text color={tokens.textMuted} mt={1}>
             Gerencie funcionários, cargos e permissões do sistema.
           </Text>
         </Box>
@@ -171,7 +179,7 @@ export default function EmployeePage() {
         </Button>
       </Flex>
 
-      {/* Tabela com Sticky Header (Chakra v3 Pattern) */}
+      {}
       <Box
         rounded="xl"
         overflow="hidden"
@@ -272,7 +280,7 @@ export default function EmployeePage() {
         </Table.ScrollArea>
       </Box>
 
-      {/* Modal Refatorado para Dialog do Chakra v3 */}
+      {}
       <Dialog.Root
         open={isModalOpen}
         onOpenChange={(e) => setIsModalOpen(e.open)}
@@ -420,7 +428,8 @@ export default function EmployeePage() {
   );
 }
 
-// Helper para cores de badge
+
+
 const getRoleColor = (role: string) => {
   const colors: Record<string, string> = {
     GERENTE: 'purple',

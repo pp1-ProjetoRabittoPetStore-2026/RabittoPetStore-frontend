@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import {
   Badge,
   Box,
@@ -97,6 +98,9 @@ export default function StatusPet() {
 
   return (
     <Stack gap={6}>
+      <Helmet>
+        <title>Rabitto Pet Store — Status dos Pets</title>
+      </Helmet>
       <Box>
         <Text fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
           Controle de Serviços
@@ -177,7 +181,7 @@ function AgendamentoRow({
         </Text>
       </Table.Cell>
       <Table.Cell>
-        <Text fontSize="sm">{agendamento.servicos.map((s) => s.nome).join(', ')}</Text>
+        <Text fontSize="sm">{(agendamento.servicos ?? []).map((s) => s.nome).join(', ')}</Text>
       </Table.Cell>
       <Table.Cell whiteSpace="nowrap">
         <Text fontSize="sm">{dataHora.toLocaleDateString('pt-BR')}</Text>

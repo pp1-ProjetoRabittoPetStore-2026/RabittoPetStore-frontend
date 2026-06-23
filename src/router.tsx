@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+
 import { createBrowserRouter, Navigate, Outlet } from 'react-router';
 import { authService, type Role } from './services/auth/storage';
 import LoginPage from './pages/login';
@@ -24,7 +24,8 @@ export function GuestRoute() {
   return <Outlet />;
 }
 
-// Guarda de papel: bloqueia rotas conforme o cargo do funcionário logado.
+
+
 export function RoleRoute({ allow }: { allow: Role[] }) {
   const role = authService.getRole();
   if (!role || !allow.includes(role)) {
@@ -45,7 +46,8 @@ export const router = createBrowserRouter([
         element: <PrivateLayout />,
         children: [
           { path: '/', element: <HomePage /> },
-          // Rotas do gerente
+          
+
           {
             element: <RoleRoute allow={['GERENTE']} />,
             children: [
@@ -54,12 +56,14 @@ export const router = createBrowserRouter([
               { path: '/manager/agenda', element: <ManagerAgendaPage /> },
             ],
           },
-          // Controle de fila — gerente e tosador
+          
+
           {
             element: <RoleRoute allow={['GERENTE', 'TOSADOR']} />,
             children: [{ path: '/pets/status', element: <StatusPet /> }],
           },
-          // Agenda médica — somente veterinário
+          
+
           {
             element: <RoleRoute allow={['VETERINARIO']} />,
             children: [{ path: '/vet/agenda', element: <VetAgendaPage /> }],

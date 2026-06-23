@@ -2,7 +2,8 @@ import api from '../api';
 import type { Login, LoginResponse } from './types';
 
 export async function login(credentials: Login): Promise<LoginResponse> {
-  // Back-office: autenticação de funcionário (email ou CPF + senha)
+  
+
   const { data } = await api.post<LoginResponse>(
     '/auth/staff/login',
     credentials,

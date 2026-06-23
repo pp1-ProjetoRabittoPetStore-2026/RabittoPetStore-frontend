@@ -96,7 +96,7 @@ export default function PrivateLayout() {
       bg={tokens.pageBg}
       fontFamily="Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     >
-      {/* Navbar */}
+      {}
       <Flex
         as="header"
         h="56px"
@@ -111,7 +111,7 @@ export default function PrivateLayout() {
         zIndex="10"
         flexShrink="0"
       >
-        {/* Logo + hamburger */}
+        {}
         <HStack gap="3">
           <IconButton
             aria-label="Abrir menu"
@@ -142,14 +142,14 @@ export default function PrivateLayout() {
           </HStack>
         </HStack>
 
-        {/* Desktop nav links */}
+        {}
         <HStack gap="1" display={{ base: 'none', md: 'flex' }}>
           {navItems.map((item) => (
             <NavLink key={item.path} {...item} />
           ))}
         </HStack>
 
-        {/* Logout */}
+        {}
         <Box
           as="button"
           onClick={handleLogout}
@@ -175,12 +175,12 @@ export default function PrivateLayout() {
         </Box>
       </Flex>
 
-      {/* Content */}
+      {}
       <Box flex="1" overflow="auto" p={{ base: '5', md: '8' }}>
         <Outlet />
       </Box>
 
-      {/* Mobile drawer */}
+      {}
       <DrawerRoot
         open={drawerOpen}
         placement="start"
