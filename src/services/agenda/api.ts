@@ -1,5 +1,6 @@
 import type { AgendaFuncionario, AgendaFilters } from './types';
 import api from '../api';
+import { sortByDataHora } from '../agendamentos/api';
 
 
 
@@ -12,8 +13,11 @@ export const getAgenda = async (
   if (filters.status) params.status = filters.status;
   if (filters.nome && filters.nome.trim()) params.nome = filters.nome.trim();
 
-  const response = await api.get('/funcionarios/agenda', {
+  const response = await api.get<AgendaFuncionario[]>('/funcionarios/agenda', {
     params: Object.keys(params).length ? params : undefined,
   });
-  return response.data;
+  return response.data.map((item) => ({
+    ...item,
+    agendamentos: sortByDataHora(item.agendamentos),
+  }));
 };

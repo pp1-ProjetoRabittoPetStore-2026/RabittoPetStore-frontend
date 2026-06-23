@@ -5,7 +5,7 @@ import LoginPage from './pages/login';
 import HomePage from './pages/home';
 import PrivateLayout from './layouts/private-layout';
 import ManagerOrdersPage from './pages/manager/orders';
-import StatusPet from './pages/pets/StatusPet';
+import History from './pages/pets/History';
 import EmployeePage from './pages/manager/employee';
 import ManagerAgendaPage from './pages/manager/agenda';
 import VetAgendaPage from './pages/vet/agenda';
@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
 
           {
             element: <RoleRoute allow={['GERENTE', 'TOSADOR']} />,
-            children: [{ path: '/pets/status', element: <StatusPet /> }],
+            children: [{ path: '/pets/history', element: <History /> }],
           },
           
 

@@ -33,7 +33,7 @@ const STATUS_COLOR: Record<ServicoStatus, string> = {
   Cancelado: 'red',
 };
 
-export default function StatusPet() {
+export default function History() {
   const { data: agendamentos = [], isLoading, error } = useAgendamentos();
   const { mutate: updateStatus, isPending } = useUpdateStatus();
 
@@ -55,7 +55,7 @@ export default function StatusPet() {
         gap={4}
       >
         <Spinner size="lg" />
-        <Text color={tokens.textMuted}>Carregando serviços...</Text>
+        <Text color={tokens.textMuted}>Carregando histórico...</Text>
       </Flex>
     );
   }
@@ -70,7 +70,7 @@ export default function StatusPet() {
         gap={2}
       >
         <Text fontSize="xl" fontWeight="semibold" color={tokens.textPrimary}>
-          Erro ao carregar serviços
+          Erro ao carregar o histórico
         </Text>
         <Text color={tokens.errorText}>{(error as Error).message}</Text>
       </Flex>
@@ -87,7 +87,7 @@ export default function StatusPet() {
         gap={2}
       >
         <Text fontSize="xl" fontWeight="semibold" color={tokens.textPrimary}>
-          Nenhum serviço agendado
+          Nenhum registro no histórico
         </Text>
         <Text color={tokens.textMuted}>
           Não há agendamentos cadastrados no momento.
@@ -99,14 +99,14 @@ export default function StatusPet() {
   return (
     <Stack gap={6}>
       <Helmet>
-        <title>Rabitto Pet Store — Status dos Pets</title>
+        <title>Rabitto Pet Store — Histórico</title>
       </Helmet>
       <Box>
         <Text fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
-          Controle de Serviços
+          Histórico
         </Text>
         <Text color={tokens.textMuted} mt={1}>
-          Gerencie o status de cada serviço em tempo real.
+          Acompanhe e atualize o status de cada serviço.
         </Text>
       </Box>
 
@@ -136,6 +136,7 @@ export default function StatusPet() {
             <Table.Header>
               <Table.Row bg={tokens.panelBorder}>
                 <Table.ColumnHeader color={tokens.textMuted}>Pet</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Cliente</Table.ColumnHeader>
                 <Table.ColumnHeader color={tokens.textMuted}>Serviço</Table.ColumnHeader>
                 <Table.ColumnHeader color={tokens.textMuted}>Data / Hora</Table.ColumnHeader>
                 <Table.ColumnHeader color={tokens.textMuted}>Status</Table.ColumnHeader>
@@ -178,6 +179,11 @@ function AgendamentoRow({
         <Text fontWeight="semibold">{agendamento.pet.nome}</Text>
         <Text color={tokens.textMuted} fontSize="xs">
           {agendamento.pet.especie} • {agendamento.pet.raca}
+        </Text>
+      </Table.Cell>
+      <Table.Cell>
+        <Text fontSize="sm">
+          {agendamento.pet.tutor?.nome ?? 'Não informado'}
         </Text>
       </Table.Cell>
       <Table.Cell>

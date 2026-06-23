@@ -224,6 +224,9 @@ function OrderItem({
           <Text fontSize="lg" fontWeight="bold">
             Pet: {agendamento.pet.nome}
           </Text>
+          <Text fontSize="sm" color="gray.600">
+            Cliente: {agendamento.pet.tutor?.nome ?? 'Não informado'}
+          </Text>
           <Text fontSize="sm" color="gray.500">
             {new Date(agendamento.dataHora).toLocaleString('pt-BR')} •{' '}
             {agendamento.pet.raca}
