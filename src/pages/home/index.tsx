@@ -33,6 +33,7 @@ import {
 import { useAgendamentos } from '../../services/agendamentos/queries';
 import { usePets } from '../../services/pets/queries';
 import { useTutores } from '../../services/tutores/queries';
+import { authService } from '../../services/auth/storage';
 import { tokens } from '../../styles/tokens';
 
 const STATUS_HEX: Record<string, string> = {
@@ -61,6 +62,14 @@ function formatDate(): string {
     month: 'long',
   });
 }
+
+const roleDisplay: Record<string, string> = {
+  GERENTE: 'Gerente',
+  TOSADOR: 'Tosador',
+  VETERINARIO: 'Veterinário',
+  CAIXA: 'Caixa',
+  TUTOR: 'Tutor',
+};
 
 function startOfToday(): Date {
   const t = new Date();
@@ -170,7 +179,7 @@ export default function HomePage() {
           letterSpacing="-0.03em"
           lineHeight="1.05"
         >
-          {getGreeting()}, Gerente
+          {getGreeting()}, {roleDisplay[authService.getRole() ?? 'GERENTE']}
         </Heading>
         <Text
           fontSize="13px"

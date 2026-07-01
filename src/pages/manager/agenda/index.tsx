@@ -27,6 +27,7 @@ import {
   Stethoscope,
   Search,
   Users,
+  X,
 } from 'lucide-react';
 
 import { useAgenda } from '@/services/agenda/queries';
@@ -76,7 +77,7 @@ export default function ManagerAgendaPage() {
       .filter((e) => isVetCargo(e.cargo) || isTosadorCargo(e.cargo))
       .map((e) => ({ label: e.nome, value: String(e.id) }));
     return createListCollection({
-      items: [{ label: 'Todos os profissionais', value: '' }, ...items],
+      items: [{ label: 'Todos', value: '' }, ...items],
     });
   }, [employees]);
 
@@ -94,6 +95,23 @@ export default function ManagerAgendaPage() {
     [agendaFiltrada],
   );
 
+  const isDefaultDate = data === todayISO();
+  const activeFilterCount = [
+    !isDefaultDate,
+    !!profissional[0],
+    !!cargo[0],
+    !!status[0],
+    !!nome,
+  ].filter(Boolean).length;
+
+  function limparFiltros() {
+    setCargo(['']);
+    setStatus(['']);
+    setProfissional(['']);
+    setNome('');
+    setData(todayISO());
+  }
+
   return (
     <Box minH="100vh" py={12} px={6}>
       <Helmet>
@@ -101,123 +119,124 @@ export default function ManagerAgendaPage() {
       </Helmet>
       <Stack gap={8} maxW="1100px" mx="auto">
         {}
-        <Flex
-          justifyContent="space-between"
-          alignItems={{ base: 'flex-start', md: 'center' }}
-          direction={{ base: 'column', md: 'row' }}
-          gap={4}
-        >
-          <Box>
-            <Text fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
-              Agenda da Equipe
-            </Text>
-            <Text fontSize="sm" color={tokens.textMuted}>
-              {totalAtendimentos} atendimento{totalAtendimentos === 1 ? '' : 's'}{' '}
-              • {agendaFiltrada.length} profissional
-              {agendaFiltrada.length === 1 ? '' : 'is'} (09h–17h)
-            </Text>
-          </Box>
-
-          <HStack
-            gap={2}
-            px={3}
-            py={1}
-            rounded="lg"
-            borderWidth="1px"
-            borderColor={tokens.inputBorder}
-            bg={tokens.inputBg}
-          >
-            <CalendarDays size={18} color={tokens.textMuted} />
-            <Input
-              type="date"
-              size="sm"
-              width="170px"
-              variant="subtle"
-              bg="transparent"
-              border="none"
-              px={0}
-              color={tokens.textPrimary}
-              value={data}
-              onChange={(e) => setData(e.target.value)}
-              _focusVisible={{ outline: 'none', boxShadow: 'none' }}
-            />
-          </HStack>
-        </Flex>
+        <Box>
+          <Text fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
+            Agenda da Equipe
+          </Text>
+          <Text fontSize="sm" color={tokens.textMuted}>
+            {totalAtendimentos} atendimento{totalAtendimentos === 1 ? '' : 's'}{' '}
+            • {agendaFiltrada.length} profissional
+            {agendaFiltrada.length === 1 ? '' : 'is'} (09h–17h)
+          </Text>
+        </Box>
 
         {}
-        <Flex
-          wrap="wrap"
+        <Stack
           gap={3}
-          alignItems="center"
           p={4}
           rounded="xl"
           bg={tokens.panelBg}
           borderWidth="1px"
           borderColor={tokens.panelBorder}
         >
-          <HStack
-            gap={2}
-            px={3}
-            rounded="md"
-            borderWidth="1px"
-            borderColor={tokens.inputBorder}
-            bg={tokens.inputBg}
-            width={{ base: 'full', md: '240px' }}
-          >
-            <Search size={16} color={tokens.textMuted} />
-            <Input
-              placeholder="Buscar funcionário..."
-              size="sm"
-              variant="subtle"
-              bg="transparent"
-              border="none"
-              px={0}
-              color={tokens.textPrimary}
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              _focusVisible={{ outline: 'none', boxShadow: 'none' }}
-            />
-          </HStack>
+          <Flex wrap="wrap" gap={4} align="flex-end">
+            <FilterField label="Data" width="170px">
+              <HStack
+                gap={2}
+                px={3}
+                rounded="md"
+                borderWidth="1px"
+                borderColor={tokens.inputBorder}
+                bg={tokens.inputBg}
+              >
+                <CalendarDays size={16} color={tokens.textMuted} />
+                <Input
+                  type="date"
+                  size="sm"
+                  variant="subtle"
+                  bg="transparent"
+                  border="none"
+                  px={0}
+                  color={tokens.textPrimary}
+                  value={data}
+                  onChange={(e) => setData(e.target.value)}
+                  _focusVisible={{ outline: 'none', boxShadow: 'none' }}
+                />
+              </HStack>
+            </FilterField>
 
-          <FilterSelect
-            collection={profissionalOptions}
-            value={profissional}
-            onChange={setProfissional}
-            placeholder="Profissional"
-            width="220px"
-          />
+            <FilterField label="Funcionário" width="220px">
+              <HStack
+                gap={2}
+                px={3}
+                rounded="md"
+                borderWidth="1px"
+                borderColor={tokens.inputBorder}
+                bg={tokens.inputBg}
+              >
+                <Search size={16} color={tokens.textMuted} />
+                <Input
+                  placeholder="Buscar por nome..."
+                  size="sm"
+                  variant="subtle"
+                  bg="transparent"
+                  border="none"
+                  px={0}
+                  color={tokens.textPrimary}
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  _focusVisible={{ outline: 'none', boxShadow: 'none' }}
+                />
+              </HStack>
+            </FilterField>
 
-          <FilterSelect
-            collection={cargoOptions}
-            value={cargo}
-            onChange={setCargo}
-            placeholder="Cargo"
-            width="180px"
-          />
+            <FilterField label="Profissional" width="220px">
+              <FilterSelect
+                collection={profissionalOptions}
+                value={profissional}
+                onChange={setProfissional}
+                placeholder="Todos"
+              />
+            </FilterField>
 
-          <FilterSelect
-            collection={statusOptions}
-            value={status}
-            onChange={setStatus}
-            placeholder="Status"
-            width="180px"
-          />
+            <FilterField label="Cargo" width="160px">
+              <FilterSelect
+                collection={cargoOptions}
+                value={cargo}
+                onChange={setCargo}
+                placeholder="Todos"
+              />
+            </FilterField>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            color={tokens.textMuted}
-            onClick={() => {
-              setCargo(['']);
-              setStatus(['']);
-              setProfissional(['']);
-              setNome('');
-              setData(todayISO());
-            }}
-          >
-            Limpar filtros
-          </Button>
-        </Flex>
+            <FilterField label="Status" width="160px">
+              <FilterSelect
+                collection={statusOptions}
+                value={status}
+                onChange={setStatus}
+                placeholder="Todos"
+              />
+            </FilterField>
+          </Flex>
+
+          <Flex justify="space-between" align="center" wrap="wrap" gap={2}>
+            <Text fontSize="xs" color={tokens.textMuted}>
+              {activeFilterCount > 0
+                ? `${activeFilterCount} filtro${activeFilterCount === 1 ? '' : 's'} ativo${activeFilterCount === 1 ? '' : 's'}`
+                : 'Nenhum filtro ativo'}
+            </Text>
+            {activeFilterCount > 0 && (
+              <Button
+                size="xs"
+                variant="ghost"
+                color={tokens.textMuted}
+                onClick={limparFiltros}
+              >
+                <X size={13} />
+                Limpar filtros
+              </Button>
+            )}
+          </Flex>
+        </Stack>
 
         {}
         {isLoading ? (
@@ -269,12 +288,33 @@ export default function ManagerAgendaPage() {
   );
 }
 
+interface FilterFieldProps {
+  label: string;
+  width: string;
+  children: React.ReactNode;
+}
+
+function FilterField({ label, width, children }: FilterFieldProps) {
+  return (
+    <Box minW={0} width={{ base: 'full', md: width }}>
+      <Text
+        fontSize="xs"
+        fontWeight="medium"
+        color={tokens.textMuted}
+        mb={1}
+      >
+        {label}
+      </Text>
+      {children}
+    </Box>
+  );
+}
+
 interface FilterSelectProps {
   collection: ListCollection<SelectItem>;
   value: string[];
   onChange: (value: string[]) => void;
   placeholder: string;
-  width: string;
 }
 
 function FilterSelect({
@@ -282,13 +322,12 @@ function FilterSelect({
   value,
   onChange,
   placeholder,
-  width,
 }: FilterSelectProps) {
   return (
     <Select.Root
       collection={collection}
       size="sm"
-      width={{ base: 'full', md: width }}
+      width="full"
       value={value}
       onValueChange={(details) => onChange(details.value)}
     >
@@ -319,7 +358,7 @@ function FilterSelect({
 
 const cargoOptions = createListCollection({
   items: [
-    { label: 'Todos os cargos', value: '' },
+    { label: 'Todos', value: '' },
     { label: 'Veterinário', value: 'VETERINARIO' },
     { label: 'Tosador', value: 'TOSADOR' },
   ],
@@ -327,7 +366,7 @@ const cargoOptions = createListCollection({
 
 const statusOptions = createListCollection({
   items: [
-    { label: 'Todos os status', value: '' },
+    { label: 'Todos', value: '' },
     { label: 'Pendente', value: 'Pendente' },
     { label: 'Aguardando', value: 'Aguardando' },
     { label: 'Em Serviço', value: 'Em Serviço' },
