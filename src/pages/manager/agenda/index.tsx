@@ -12,9 +12,9 @@ import {
   Badge,
   HStack,
   Input,
-  SimpleGrid,
   Portal,
   Select,
+  Table,
   createListCollection,
   type ListCollection,
 } from '@chakra-ui/react';
@@ -32,7 +32,6 @@ import {
 
 import { useAgenda } from '@/services/agenda/queries';
 import { useEmployees } from '@/services/employee/queries';
-import type { AgendaFuncionario } from '@/services/agenda/types';
 import { tokens } from '@/styles/tokens';
 
 function todayISO(): string {
@@ -94,6 +93,23 @@ export default function ManagerAgendaPage() {
     () => agendaFiltrada.reduce((sum, i) => sum + i.agendamentos.length, 0),
     [agendaFiltrada],
   );
+
+  const linhas = useMemo(() => {
+    return agendaFiltrada
+      .flatMap((item) =>
+        item.agendamentos.length === 0
+          ? [{ funcionario: item.funcionario, agendamento: null }]
+          : item.agendamentos.map((ag) => ({
+              funcionario: item.funcionario,
+              agendamento: ag,
+            })),
+      )
+      .sort((a, b) => {
+        if (!a.agendamento) return 1;
+        if (!b.agendamento) return -1;
+        return a.agendamento.dataHora.localeCompare(b.agendamento.dataHora);
+      });
+  }, [agendaFiltrada]);
 
   const isDefaultDate = data === todayISO();
   const activeFilterCount = [
@@ -277,11 +293,122 @@ export default function ManagerAgendaPage() {
             </Text>
           </Box>
         ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={4}>
-            {agendaFiltrada.map((item) => (
-              <FuncionarioCard key={item.funcionario.id} item={item} />
-            ))}
-          </SimpleGrid>
+          <Box
+            rounded="xl"
+            overflow="hidden"
+            bg={tokens.panelBg}
+            borderWidth="1px"
+            borderColor={tokens.panelBorder}
+            color={tokens.textPrimary}
+          >
+            <Table.ScrollArea h="600px">
+              <Table.Root
+                size="md"
+                stickyHeader
+                bg="transparent"
+                css={{
+                  '& td, & th': {
+                    bg: 'transparent',
+                    borderColor: tokens.panelBorder,
+                  },
+                  '& tbody tr': { bg: 'transparent' },
+                  '& tbody tr:hover': { bg: tokens.panelBorder },
+                }}
+              >
+                <Table.Header>
+                  <Table.Row bg={tokens.panelBorder}>
+                    <Table.ColumnHeader color={tokens.textMuted}>
+                      Horário
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader color={tokens.textMuted}>
+                      Profissional
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader color={tokens.textMuted}>
+                      Cargo
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader color={tokens.textMuted}>
+                      Pet / Tutor
+                    </Table.ColumnHeader>
+                    <Table.ColumnHeader color={tokens.textMuted} textAlign="end">
+                      Status
+                    </Table.ColumnHeader>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {linhas.map(({ funcionario, agendamento: ag }) => {
+                    const isVet = isVetCargo(funcionario.cargo);
+                    return (
+                      <Table.Row
+                        key={`${funcionario.id}-${ag?.id ?? 'empty'}`}
+                      >
+                        <Table.Cell>
+                          <HStack gap={2}>
+                            <Clock size={13} color={tokens.textMuted} />
+                            <Text fontSize="sm">
+                              {ag ? formatHora(ag.dataHora) : '—'}
+                            </Text>
+                          </HStack>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <HStack gap={3}>
+                            <Flex
+                              w={8}
+                              h={8}
+                              rounded="full"
+                              align="center"
+                              justify="center"
+                              bg={isVet ? 'blue.subtle' : 'orange.subtle'}
+                              color={isVet ? 'blue.fg' : 'orange.fg'}
+                            >
+                              {isVet ? (
+                                <Stethoscope size={16} />
+                              ) : (
+                                <PawPrint size={16} />
+                              )}
+                            </Flex>
+                            <Text fontWeight="medium">{funcionario.nome}</Text>
+                          </HStack>
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Badge
+                            variant="subtle"
+                            colorPalette={isVet ? 'blue' : 'orange'}
+                          >
+                            {funcionario.cargo}
+                          </Badge>
+                        </Table.Cell>
+                        <Table.Cell>
+                          {ag ? (
+                            <Text fontSize="sm" color={tokens.textMuted}>
+                              {ag.pet.nome}
+                              {ag.pet.tutor?.nome
+                                ? ` · ${ag.pet.tutor.nome}`
+                                : ''}
+                            </Text>
+                          ) : (
+                            <Text fontSize="sm" color={tokens.textMuted}>
+                              Sem atendimentos
+                            </Text>
+                          )}
+                        </Table.Cell>
+                        <Table.Cell textAlign="end">
+                          {ag && (
+                            <Badge
+                              size="sm"
+                              variant="subtle"
+                              colorPalette={getBadgePalette(ag.status)}
+                            >
+                              {ag.status}
+                            </Badge>
+                          )}
+                        </Table.Cell>
+                      </Table.Row>
+                    );
+                  })}
+                </Table.Body>
+              </Table.Root>
+            </Table.ScrollArea>
+          </Box>
         )}
       </Stack>
     </Box>
@@ -376,105 +503,6 @@ const statusOptions = createListCollection({
     { label: 'Rejeitado', value: 'Rejeitado' },
   ],
 });
-
-interface FuncionarioCardProps {
-  item: AgendaFuncionario;
-}
-
-function FuncionarioCard({ item }: FuncionarioCardProps) {
-  const { funcionario, agendamentos } = item;
-  const isVet = isVetCargo(funcionario.cargo);
-
-  return (
-    <Box
-      rounded="xl"
-      bg={tokens.panelBg}
-      borderWidth="1px"
-      borderColor={tokens.panelBorder}
-      color={tokens.textPrimary}
-      p={5}
-      transition="transform 0.15s, box-shadow 0.15s"
-      _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
-    >
-      {}
-      <Flex justify="space-between" align="center" mb={4}>
-        <HStack gap={3}>
-          <Flex
-            w={9}
-            h={9}
-            rounded="full"
-            align="center"
-            justify="center"
-            bg={isVet ? 'blue.subtle' : 'orange.subtle'}
-            color={isVet ? 'blue.fg' : 'orange.fg'}
-          >
-            {isVet ? <Stethoscope size={18} /> : <PawPrint size={18} />}
-          </Flex>
-          <Box>
-            <Text fontWeight="semibold" lineHeight="1.2">
-              {funcionario.nome}
-            </Text>
-            <Text fontSize="xs" color={tokens.textMuted}>
-              {funcionario.cargo}
-            </Text>
-          </Box>
-        </HStack>
-        <Badge
-          variant="subtle"
-          colorPalette={agendamentos.length > 0 ? 'blue' : 'gray'}
-        >
-          {agendamentos.length}
-        </Badge>
-      </Flex>
-
-      {}
-      {agendamentos.length === 0 ? (
-        <Text
-          fontSize="sm"
-          color={tokens.textMuted}
-          textAlign="center"
-          py={3}
-        >
-          Sem atendimentos
-        </Text>
-      ) : (
-        <Stack gap={2}>
-          {agendamentos.map((ag) => (
-            <Flex
-              key={ag.id}
-              align="center"
-              justify="space-between"
-              gap={2}
-              px={3}
-              py={2}
-              rounded="md"
-              borderWidth="1px"
-              borderColor={tokens.panelBorder}
-            >
-              <HStack gap={2} minW={0}>
-                <Clock size={13} color={tokens.textMuted} />
-                <Text fontSize="xs" fontWeight="medium" whiteSpace="nowrap">
-                  {formatHora(ag.dataHora)}
-                </Text>
-                <Text fontSize="xs" color={tokens.textMuted} truncate>
-                  {ag.pet.nome}
-                  {ag.pet.tutor?.nome ? ` · ${ag.pet.tutor.nome}` : ''}
-                </Text>
-              </HStack>
-              <Badge
-                size="sm"
-                variant="subtle"
-                colorPalette={getBadgePalette(ag.status)}
-              >
-                {ag.status}
-              </Badge>
-            </Flex>
-          ))}
-        </Stack>
-      )}
-    </Box>
-  );
-}
 
 function formatHora(dataHora: string): string {
   return new Date(dataHora).toLocaleTimeString('pt-BR', {
