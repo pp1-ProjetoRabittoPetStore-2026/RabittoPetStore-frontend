@@ -208,9 +208,24 @@ export default function ServicosPage() {
       </Box>
 
       <Dialog.Root open={isModalOpen} onOpenChange={(e) => setIsModalOpen(e.open)}>
-        <Dialog.Backdrop />
+        <Dialog.Backdrop bg="blackAlpha.600" />
         <Dialog.Positioner>
-          <Dialog.Content rounded="2xl" p="6">
+          <Dialog.Content
+            rounded="2xl"
+            p="6"
+            bg={tokens.panelBg}
+            color={tokens.textPrimary}
+            borderWidth="1px"
+            borderColor={tokens.panelBorder}
+            css={{
+              '& input': {
+                bg: tokens.inputBg,
+                borderColor: tokens.inputBorder,
+                color: tokens.textPrimary,
+              },
+              '& input::placeholder': { color: tokens.textMuted },
+            }}
+          >
             <Dialog.Header>
               <Dialog.Title fontSize="xl">
                 {editing ? 'Editar Serviço' : 'Cadastrar Serviço'}
