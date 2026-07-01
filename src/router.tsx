@@ -8,6 +8,7 @@ import ManagerOrdersPage from './pages/manager/orders';
 import History from './pages/pets/History';
 import EmployeePage from './pages/manager/employee';
 import ManagerAgendaPage from './pages/manager/agenda';
+import ServicosPage from './pages/manager/servicos';
 import VetAgendaPage from './pages/vet/agenda';
 
 export function ProtectedRoute() {
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
               { path: '/manager/orders', element: <ManagerOrdersPage /> },
               { path: '/manager/employee', element: <EmployeePage /> },
               { path: '/manager/agenda', element: <ManagerAgendaPage /> },
+              { path: '/manager/servicos', element: <ServicosPage /> },
             ],
           },
           

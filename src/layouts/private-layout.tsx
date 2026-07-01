@@ -14,7 +14,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { Calendar, CalendarDays, History, Home, LogOut, Menu, Stethoscope, Users, X } from 'lucide-react';
+import { Calendar, CalendarDays, History, Home, LogOut, Menu, Scissors, Stethoscope, Users, X } from 'lucide-react';
 import { useLogout } from '../services/auth/queries';
 import { authService, type Role } from '../services/auth/storage';
 import { tokens } from '../styles/tokens';
@@ -30,6 +30,7 @@ const ALL_NAV_ITEMS: {
   { label: 'Agendamentos',     path: '/manager/orders',   icon: Calendar,     roles: ['GERENTE'] },
   { label: 'Agenda',           path: '/manager/agenda',   icon: CalendarDays, roles: ['GERENTE'] },
   { label: 'Funcionários',     path: '/manager/employee', icon: Users,        roles: ['GERENTE'] },
+  { label: 'Serviços',         path: '/manager/servicos', icon: Scissors,     roles: ['GERENTE'] },
   { label: 'Histórico',        path: '/pets/history',     icon: History,      roles: ['GERENTE', 'TOSADOR'] },
   { label: 'Minhas Consultas', path: '/vet/agenda',       icon: Stethoscope,  roles: ['VETERINARIO'] },
 ];
