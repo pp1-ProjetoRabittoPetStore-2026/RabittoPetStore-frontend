@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import {
-  Badge,
   Box,
   Button,
+  Collapsible,
   Flex,
-  HStack,
   Input,
+  Menu,
   Portal,
   Select,
   Spinner,
@@ -64,6 +64,7 @@ export default function History() {
   const [status, setStatus] = useState<string[]>(['']);
   const [dataInicio, setDataInicio] = useState<string>('');
   const [dataFim, setDataFim] = useState<string>('');
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   function handleStatusChange(
     agendamento: Agendamento,
@@ -97,6 +98,11 @@ export default function History() {
       ],
     });
   }, [agendamentos]);
+
+  const secondaryFilterCount = [pet[0], servico[0], dataInicio, dataFim].filter(
+    Boolean,
+  ).length;
+  const hasAnyFilter = Boolean(status[0]) || secondaryFilterCount > 0;
 
   const filtered = useMemo(() => {
     const petId = pet[0];
@@ -150,7 +156,7 @@ export default function History() {
         <title>Rabitto Pet Store — Histórico</title>
       </Helmet>
       <Box>
-        <Text fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
+        <Text as="h1" fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
           Histórico
         </Text>
         <Text color={tokens.textMuted} mt={1}>
@@ -158,52 +164,103 @@ export default function History() {
         </Text>
       </Box>
 
-      {}
-      <Flex
-        wrap="wrap"
-        gap={3}
-        alignItems="flex-end"
-        p={4}
-        rounded="xl"
-        bg={tokens.panelBg}
-        borderWidth="1px"
-        borderColor={tokens.panelBorder}
+      <Collapsible.Root
+        open={showMoreFilters}
+        onOpenChange={(d) => setShowMoreFilters(d.open)}
       >
-        <FilterSelect collection={petOptions} value={pet} onChange={setPet} placeholder="Pet" width="200px" />
-        <FilterSelect collection={servicoOptions} value={servico} onChange={setServico} placeholder="Serviço" width="200px" />
-        <FilterSelect collection={statusFilterOptions} value={status} onChange={setStatus} placeholder="Status" width="180px" />
+        <Box
+          p={4}
+          rounded="xl"
+          bg={tokens.panelBg}
+          borderWidth="1px"
+          borderColor={tokens.panelBorder}
+        >
+          <Flex gap={3} wrap="wrap" align="center">
+            <FilterSelect
+              collection={statusFilterOptions}
+              value={status}
+              onChange={setStatus}
+              placeholder="Status"
+              width="180px"
+            />
 
-        <Box>
-          <Text fontSize="xs" color={tokens.textMuted} mb={1}>De</Text>
-          <Input
-            type="date"
-            size="sm"
-            width="160px"
-            bg={tokens.inputBg}
-            borderColor={tokens.inputBorder}
-            color={tokens.textPrimary}
-            value={dataInicio}
-            onChange={(e) => setDataInicio(e.target.value)}
-          />
-        </Box>
-        <Box>
-          <Text fontSize="xs" color={tokens.textMuted} mb={1}>Até</Text>
-          <Input
-            type="date"
-            size="sm"
-            width="160px"
-            bg={tokens.inputBg}
-            borderColor={tokens.inputBorder}
-            color={tokens.textPrimary}
-            value={dataFim}
-            onChange={(e) => setDataFim(e.target.value)}
-          />
-        </Box>
+            <Collapsible.Trigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                bg="transparent"
+                borderColor={tokens.inputBorder}
+                color={tokens.textMuted}
+              >
+                Mais filtros
+                {secondaryFilterCount > 0 ? ` · ${secondaryFilterCount}` : ''}
+                <ChevronDownIcon
+                  style={{
+                    transform: showMoreFilters ? 'rotate(180deg)' : 'none',
+                    transition: 'transform 0.15s ease',
+                  }}
+                />
+              </Button>
+            </Collapsible.Trigger>
 
-        <Button size="sm" variant="ghost" color={tokens.textMuted} onClick={clearFilters}>
-          Limpar filtros
-        </Button>
-      </Flex>
+            {hasAnyFilter && (
+              <Button
+                size="sm"
+                variant="ghost"
+                color={tokens.textMuted}
+                onClick={clearFilters}
+              >
+                Limpar filtros
+              </Button>
+            )}
+          </Flex>
+
+          <Collapsible.Content>
+            <Flex gap={3} wrap="wrap" align="flex-end" pt={4}>
+              <FilterSelect
+                collection={petOptions}
+                value={pet}
+                onChange={setPet}
+                placeholder="Pet"
+                width="200px"
+              />
+              <FilterSelect
+                collection={servicoOptions}
+                value={servico}
+                onChange={setServico}
+                placeholder="Serviço"
+                width="200px"
+              />
+              <Box>
+                <Text fontSize="xs" color={tokens.textMuted} mb={1}>De</Text>
+                <Input
+                  type="date"
+                  size="sm"
+                  width="160px"
+                  bg={tokens.inputBg}
+                  borderColor={tokens.inputBorder}
+                  color={tokens.textPrimary}
+                  value={dataInicio}
+                  onChange={(e) => setDataInicio(e.target.value)}
+                />
+              </Box>
+              <Box>
+                <Text fontSize="xs" color={tokens.textMuted} mb={1}>Até</Text>
+                <Input
+                  type="date"
+                  size="sm"
+                  width="160px"
+                  bg={tokens.inputBg}
+                  borderColor={tokens.inputBorder}
+                  color={tokens.textPrimary}
+                  value={dataFim}
+                  onChange={(e) => setDataFim(e.target.value)}
+                />
+              </Box>
+            </Flex>
+          </Collapsible.Content>
+        </Box>
+      </Collapsible.Root>
 
       {filtered.length === 0 ? (
         <Box
@@ -217,9 +274,21 @@ export default function History() {
           <Text fontSize="lg" color={tokens.textMuted}>
             Nenhum registro encontrado
           </Text>
-          <Text fontSize="sm" color={tokens.textMuted}>
+          <Text fontSize="sm" color={tokens.textMuted} mt={1}>
             Ajuste os filtros para ver mais resultados
           </Text>
+          {hasAnyFilter && (
+            <Button
+              size="sm"
+              variant="outline"
+              mt={4}
+              borderColor={tokens.inputBorder}
+              color={tokens.textMuted}
+              onClick={clearFilters}
+            >
+              Limpar filtros
+            </Button>
+          )}
         </Box>
       ) : (
         <Box
@@ -244,12 +313,11 @@ export default function History() {
             >
               <Table.Header>
                 <Table.Row bg={tokens.panelBorder}>
-                  <Table.ColumnHeader color={tokens.textMuted}>Pet</Table.ColumnHeader>
-                  <Table.ColumnHeader color={tokens.textMuted}>Cliente</Table.ColumnHeader>
-                  <Table.ColumnHeader color={tokens.textMuted}>Serviço</Table.ColumnHeader>
-                  <Table.ColumnHeader color={tokens.textMuted}>Data / Hora</Table.ColumnHeader>
-                  <Table.ColumnHeader color={tokens.textMuted}>Status</Table.ColumnHeader>
-                  <Table.ColumnHeader color={tokens.textMuted} textAlign="end">Alterar</Table.ColumnHeader>
+                  <Table.ColumnHeader color={tokens.textMuted} fontSize="xs" fontWeight="medium" letterSpacing="0.01em">Pet</Table.ColumnHeader>
+                  <Table.ColumnHeader color={tokens.textMuted} fontSize="xs" fontWeight="medium" letterSpacing="0.01em">Cliente</Table.ColumnHeader>
+                  <Table.ColumnHeader color={tokens.textMuted} fontSize="xs" fontWeight="medium" letterSpacing="0.01em">Serviço</Table.ColumnHeader>
+                  <Table.ColumnHeader color={tokens.textMuted} fontSize="xs" fontWeight="medium" letterSpacing="0.01em">Data / Hora</Table.ColumnHeader>
+                  <Table.ColumnHeader color={tokens.textMuted} fontSize="xs" fontWeight="medium" letterSpacing="0.01em">Status</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -319,75 +387,140 @@ function AgendamentoRow({ agendamento, onStatusChange, isDisabled }: Agendamento
 
   return (
     <Table.Row>
-      <Table.Cell>
+      <Table.Cell py={4}>
         <Text fontWeight="semibold">{agendamento.pet.nome}</Text>
         <Text color={tokens.textMuted} fontSize="xs">
           {agendamento.pet.especie} • {agendamento.pet.raca}
         </Text>
       </Table.Cell>
-      <Table.Cell>
+      <Table.Cell py={4}>
         <Text fontSize="sm">{agendamento.pet.tutor?.nome ?? 'Não informado'}</Text>
       </Table.Cell>
-      <Table.Cell>
+      <Table.Cell py={4}>
         <Text fontSize="sm">{(agendamento.servicos ?? []).map((s) => s.nome).join(', ')}</Text>
       </Table.Cell>
-      <Table.Cell whiteSpace="nowrap">
-        <Text fontSize="sm">{dataHora.toLocaleDateString('pt-BR')}</Text>
-        <Text fontSize="xs" color={tokens.textMuted}>
+      <Table.Cell py={4} whiteSpace="nowrap">
+        <Text fontSize="sm" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {dataHora.toLocaleDateString('pt-BR')}
+        </Text>
+        <Text fontSize="xs" color={tokens.textMuted} style={{ fontVariantNumeric: 'tabular-nums' }}>
           {dataHora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </Text>
       </Table.Cell>
-      <Table.Cell>
-        <Badge colorPalette={STATUS_COLOR[agendamento.status]} variant="solid" size="md">
-          {agendamento.status}
-        </Badge>
-      </Table.Cell>
-      <Table.Cell>
-        <HStack gap={1} wrap="wrap" justify="flex-end">
-          {STATUS_OPTIONS.map((s) => (
-            <StatusButton
-              key={s}
-              label={s}
-              isActive={agendamento.status === s}
-              isDisabled={isDisabled}
-              onClick={() => onStatusChange(agendamento, s)}
-            />
-          ))}
-        </HStack>
+      <Table.Cell py={4}>
+        <StatusControl
+          agendamento={agendamento}
+          onStatusChange={onStatusChange}
+          isDisabled={isDisabled}
+        />
       </Table.Cell>
     </Table.Row>
   );
 }
 
-interface StatusButtonProps {
-  label: ServicoStatus;
-  isActive: boolean;
+interface StatusControlProps {
+  agendamento: Agendamento;
+  onStatusChange: (agendamento: Agendamento, status: ServicoStatus) => void;
   isDisabled: boolean;
-  onClick: () => void;
 }
 
-function StatusButton({ label, isActive, isDisabled, onClick }: StatusButtonProps) {
-  const color = STATUS_COLOR[label];
+function StatusControl({ agendamento, onStatusChange, isDisabled }: StatusControlProps) {
+  const color = STATUS_COLOR[agendamento.status];
+  const otherStatuses = STATUS_OPTIONS.filter((s) => s !== agendamento.status);
 
   return (
-    <Box
-      as="button"
-      onClick={onClick}
-      px={2}
-      py={1}
-      fontSize="xs"
-      fontWeight="medium"
-      borderRadius="md"
-      borderWidth="1px"
-      cursor={isActive || isDisabled ? 'default' : 'pointer'}
-      bg={isActive ? `${color}.100` : 'transparent'}
-      borderColor={isActive ? `${color}.400` : tokens.inputBorder}
-      color={isActive ? `${color}.700` : tokens.textMuted}
-      _hover={isActive || isDisabled ? {} : { bg: `${color}.50`, borderColor: `${color}.300`, color: `${color}.700` }}
-      transition="all 0.15s"
-      whiteSpace="nowrap"
+    <Menu.Root positioning={{ placement: 'bottom-start' }}>
+      <Menu.Trigger asChild disabled={isDisabled || otherStatuses.length === 0}>
+        <Box
+          as="button"
+          type="button"
+          disabled={isDisabled || otherStatuses.length === 0}
+          display="inline-flex"
+          alignItems="center"
+          gap={2}
+          pl={3}
+          pr={2}
+          py="6px"
+          rounded="full"
+          borderWidth="1px"
+          borderColor={`${color}.300`}
+          bg={`${color}.100`}
+          color={`${color}.700`}
+          fontSize="xs"
+          fontWeight="medium"
+          cursor={isDisabled || otherStatuses.length === 0 ? 'default' : 'pointer'}
+          opacity={isDisabled ? 0.6 : 1}
+          transition="background 0.15s ease, border-color 0.15s ease"
+          _hover={
+            isDisabled || otherStatuses.length === 0
+              ? {}
+              : { borderColor: `${color}.400`, bg: `${color}.200` }
+          }
+          _focusVisible={{
+            outline: '2px solid',
+            outlineColor: tokens.accent,
+            outlineOffset: '2px',
+          }}
+        >
+          <Box w="6px" h="6px" rounded="full" bg={`${color}.500`} flexShrink={0} />
+          {agendamento.status}
+          {otherStatuses.length > 0 && !isDisabled && <ChevronDownIcon size={10} />}
+        </Box>
+      </Menu.Trigger>
+
+      {otherStatuses.length > 0 && (
+        <Portal>
+          <Menu.Positioner>
+            <Menu.Content
+              minW="9.5rem"
+              bg={tokens.panelBg}
+              borderColor={tokens.panelBorder}
+              borderWidth="1px"
+              rounded="md"
+              py={1}
+              boxShadow="none"
+            >
+              {otherStatuses.map((s) => (
+                <Menu.Item
+                  key={s}
+                  value={s}
+                  onSelect={() => onStatusChange(agendamento, s)}
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                  fontSize="sm"
+                  color={tokens.textPrimary}
+                  _hover={{ bg: tokens.panelBorder }}
+                >
+                  <Box w="6px" h="6px" rounded="full" bg={`${STATUS_COLOR[s]}.500`} flexShrink={0} />
+                  {s}
+                </Menu.Item>
+              ))}
+            </Menu.Content>
+          </Menu.Positioner>
+        </Portal>
+      )}
+    </Menu.Root>
+  );
+}
+
+function ChevronDownIcon({ size = 12, style }: { size?: number; style?: CSSProperties }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 10 10"
+      fill="none"
+      aria-hidden="true"
+      style={style}
     >
-      {label}
-    </Box>
+      <path
+        d="M2 3.5L5 6.5L8 3.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
