@@ -4,25 +4,27 @@ import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
 import {
   Box,
-  Stack,
   Flex,
+  Heading,
   Text,
   Spinner,
   Button,
   Badge,
   Portal,
   Select,
+  Table,
+  HStack,
   createListCollection,
 } from '@chakra-ui/react';
 import { Check, X } from 'lucide-react';
 
-import { useColorModeValue } from '@/components/ui/color-mode';
 import { toaster } from '@/components/ui/toaster';
 import {
   useAgendamentosByStatus,
   useUpdateStatus,
 } from '@/services/agendamentos/queries';
 import type { Agendamento, ServicoStatus } from '@/services/agendamentos/types';
+import { tokens } from '@/styles/tokens';
 
 export default function ManagerOrdersPage() {
   
@@ -63,100 +65,128 @@ export default function ManagerOrdersPage() {
   };
 
   return (
-    <Box minH="100vh" py={12} px={6}>
+    <Box p="8">
       <Helmet>
         <title>Rabitto Pet Store — Agendamentos</title>
       </Helmet>
-      <Stack gap={8} maxW="800px" mx="auto">
-        {}
-        <Flex
-          justifyContent="space-between"
-          alignItems="center"
-          wrap="wrap"
-          gap={4}
-        >
-          <Text fontSize="2xl" fontWeight="bold">
+      <Flex justify="space-between" align="flex-end" mb="8" wrap="wrap" gap={4}>
+        <Box>
+          <Heading size="2xl" color={tokens.textPrimary}>
             Gerenciar Agendamentos
+          </Heading>
+          <Text color={tokens.textMuted} mt={1}>
+            Acompanhe e atualize o status dos agendamentos da loja.
           </Text>
+        </Box>
 
-          <Select.Root
-            collection={statusOptions}
-            size="sm"
-            width="240px"
-            value={statusFilter}
-            onValueChange={(details) => setStatusFilter(details.value)}
-          >
-            <Select.Label fontSize="xs" mb={1} color="gray.500">
-              Filtrar por Status
-            </Select.Label>
-            <Select.Control>
-              <Select.Trigger>
-                <Select.ValueText placeholder="Selecione o status" />
-              </Select.Trigger>
-            </Select.Control>
-            <Portal>
-              <Select.Positioner>
-                <Select.Content>
-                  {statusOptions.items.map((item) => (
-                    <Select.Item item={item} key={item.value}>
-                      {item.label}
-                      <Select.ItemIndicator />
-                    </Select.Item>
-                  ))}
-                </Select.Content>
-              </Select.Positioner>
-            </Portal>
-          </Select.Root>
-        </Flex>
+        <Select.Root
+          collection={statusOptions}
+          size="sm"
+          width="240px"
+          value={statusFilter}
+          onValueChange={(details) => setStatusFilter(details.value)}
+        >
+          <Select.Label fontSize="xs" mb={1} color={tokens.textMuted}>
+            Filtrar por Status
+          </Select.Label>
+          <Select.Control>
+            <Select.Trigger>
+              <Select.ValueText placeholder="Selecione o status" />
+            </Select.Trigger>
+          </Select.Control>
+          <Portal>
+            <Select.Positioner>
+              <Select.Content>
+                {statusOptions.items.map((item) => (
+                  <Select.Item item={item} key={item.value}>
+                    {item.label}
+                    <Select.ItemIndicator />
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Positioner>
+          </Portal>
+        </Select.Root>
+      </Flex>
 
-        {}
-        {isLoading ? (
-          <Box textAlign="center" py={10}>
-            <Spinner size="lg" />
-            <Text mt={4} color="gray.500">
-              Buscando agendamentos...
-            </Text>
-          </Box>
-        ) : error ? (
-          <Box textAlign="center" py={10}>
-            <Text color="red.500">Erro ao carregar dados</Text>
-            <Button
-              mt={4}
-              variant="outline"
-              onClick={() => window.location.reload()}
-            >
-              Tentar novamente
-            </Button>
-          </Box>
-        ) : agendamentos.length === 0 ? (
-          <Box
-            textAlign="center"
-            py={20}
-            borderStyle="dashed"
-            borderWidth="2px"
-            borderRadius="xl"
+      <Box
+        rounded="xl"
+        overflow="hidden"
+        bg={tokens.panelBg}
+        borderWidth="1px"
+        borderColor={tokens.panelBorder}
+        color={tokens.textPrimary}
+      >
+        <Table.ScrollArea h="600px">
+          <Table.Root
+            size="md"
+            stickyHeader
+            bg="transparent"
+            css={{
+              '& td, & th': { bg: 'transparent', borderColor: tokens.panelBorder },
+              '& tbody tr': { bg: 'transparent' },
+              '& tbody tr:hover': { bg: tokens.panelBorder },
+            }}
           >
-            <Text fontSize="xl" color="gray.500">
-              Nenhum agendamento encontrado
-            </Text>
-            <Text fontSize="sm" color="gray.400">
-              Não há registros com o status "{currentStatus}"
-            </Text>
-          </Box>
-        ) : (
-          <Stack gap={4}>
-            {agendamentos.map((item) => (
-              <OrderItem
-                key={item.id}
-                agendamento={item}
-                onApprove={(id) => handleUpdate(id, 'Aguardando')}
-                onReject={(id) => handleUpdate(id, 'Rejeitado')}
-                isUpdating={isUpdating}
-              />
-            ))}
-          </Stack>
-        )}
-      </Stack>
+            <Table.Header>
+              <Table.Row bg={tokens.panelBorder}>
+                <Table.ColumnHeader color={tokens.textMuted}>Pet</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Cliente</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Data/Hora</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Serviços</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted} textAlign="end">Preço</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted}>Status</Table.ColumnHeader>
+                <Table.ColumnHeader color={tokens.textMuted} textAlign="end">Ações</Table.ColumnHeader>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {isLoading ? (
+                <Table.Row>
+                  <Table.Cell colSpan={7} textAlign="center" py="10">
+                    <Spinner />
+                  </Table.Cell>
+                </Table.Row>
+              ) : error ? (
+                <Table.Row>
+                  <Table.Cell colSpan={7} textAlign="center" py="10">
+                    <Text color={tokens.errorText} mb={3}>
+                      Erro ao carregar dados
+                    </Text>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.reload()}
+                    >
+                      Tentar novamente
+                    </Button>
+                  </Table.Cell>
+                </Table.Row>
+              ) : agendamentos.length === 0 ? (
+                <Table.Row>
+                  <Table.Cell colSpan={7} textAlign="center" py="16">
+                    <Text fontSize="lg" fontWeight="medium" color={tokens.textPrimary}>
+                      Nenhum agendamento encontrado
+                    </Text>
+                    <Text fontSize="sm" color={tokens.textMuted} mt={1}>
+                      Não há registros com o status "{currentStatus}"
+                    </Text>
+                  </Table.Cell>
+                </Table.Row>
+              ) : (
+                agendamentos.map((item) => (
+                  <OrderRow
+                    key={item.id}
+                    agendamento={item}
+                    onApprove={(id) => handleUpdate(id, 'Aguardando')}
+                    onReject={(id) => handleUpdate(id, 'Rejeitado')}
+                    isUpdating={isUpdating}
+                  />
+                ))
+              )}
+            </Table.Body>
+          </Table.Root>
+        </Table.ScrollArea>
+      </Box>
     </Box>
   );
 }
@@ -172,95 +202,73 @@ const statusOptions = createListCollection({
   ],
 });
 
-interface OrderItemProps {
+interface OrderRowProps {
   agendamento: Agendamento;
   onApprove: (id: number) => void;
   onReject: (id: number) => void;
   isUpdating: boolean;
 }
 
-function OrderItem({
+function getBadgePalette(status: string) {
+  switch (status) {
+    case 'Pendente':
+      return 'yellow';
+    case 'Aguardando':
+      return 'blue';
+    case 'Em Serviço':
+      return 'orange';
+    case 'Pronto':
+      return 'green';
+    case 'Rejeitado':
+    case 'Cancelado':
+      return 'red';
+    default:
+      return 'gray';
+  }
+}
+
+function OrderRow({
   agendamento,
   onApprove,
   onReject,
   isUpdating,
-}: OrderItemProps) {
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.700');
-
-  
-
-  const getBadgePalette = (status: string) => {
-    switch (status) {
-      case 'Pendente':
-        return 'yellow';
-      case 'Aguardando':
-        return 'blue';
-      case 'Em Serviço':
-        return 'orange';
-      case 'Pronto':
-        return 'green';
-      case 'Rejeitado':
-      case 'Cancelado':
-        return 'red';
-      default:
-        return 'gray';
-    }
-  };
+}: OrderRowProps) {
+  const total = agendamento.servicos.reduce(
+    (sum, s) => sum + (s.preco ?? 0),
+    0,
+  );
 
   return (
-    <Box
-      bg={bgColor}
-      borderRadius="lg"
-      borderWidth="1px"
-      borderColor={borderColor}
-      p={6}
-      shadow="sm"
-      transition="transform 0.2s"
-      _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
-    >
-      <Flex alignItems="center" justifyContent="space-between" mb={4}>
-        <Box>
-          <Text fontSize="lg" fontWeight="bold">
-            Pet: {agendamento.pet.nome}
-          </Text>
-          <Text fontSize="sm" color="gray.600">
-            Cliente: {agendamento.pet.tutor?.nome ?? 'Não informado'}
-          </Text>
-          <Text fontSize="sm" color="gray.500">
-            {new Date(agendamento.dataHora).toLocaleString('pt-BR')} •{' '}
-            {agendamento.pet.raca}
-          </Text>
-        </Box>
-        <Badge colorPalette={getBadgePalette(agendamento.status)}>
+    <Table.Row>
+      <Table.Cell>
+        <Text fontWeight="medium">{agendamento.pet.nome}</Text>
+        <Text fontSize="xs" color={tokens.textMuted}>
+          {agendamento.pet.raca}
+        </Text>
+      </Table.Cell>
+      <Table.Cell>{agendamento.pet.tutor?.nome ?? 'Não informado'}</Table.Cell>
+      <Table.Cell>
+        {new Date(agendamento.dataHora).toLocaleString('pt-BR')}
+      </Table.Cell>
+      <Table.Cell>{agendamento.servicos.map((s) => s.nome).join(', ')}</Table.Cell>
+      <Table.Cell textAlign="end" fontWeight="bold" color={tokens.accent}>
+        R$ {total.toFixed(2)}
+      </Table.Cell>
+      <Table.Cell>
+        <Badge variant="solid" colorPalette={getBadgePalette(agendamento.status)}>
           {agendamento.status}
         </Badge>
-      </Flex>
-
-      <Stack gap={3} borderTopWidth="1px" pt={4} borderColor={borderColor}>
-        <Flex justifyContent="space-between" alignItems="center">
-          <Box>
-            <Text fontWeight="medium">{agendamento.servicos.map((s) => s.nome).join(', ')}</Text>
-            <Text fontSize="xs" color="gray.500">
-              Preço do serviço
-            </Text>
-          </Box>
-          <Text fontWeight="bold" fontSize="lg" color="green.600">
-            R$ {agendamento.servicos.reduce((total, s) => total + (s.preco ?? 0), 0).toFixed(2)}
-          </Text>
-        </Flex>
-
-        {}
-        {agendamento.status === 'Pendente' && (
-          <Flex gap={3} mt={2}>
+      </Table.Cell>
+      <Table.Cell textAlign="end">
+        {agendamento.status === 'Pendente' ? (
+          <HStack gap="2" justify="flex-end">
             <Button
               onClick={() => onApprove(agendamento.id)}
               loading={isUpdating}
               colorPalette="green"
-              flex={1}
               size="sm"
             >
-              <Check size={16} style={{ marginRight: '8px' }} />
+              <Check size={16} />
               Aprovar
             </Button>
             <Button
@@ -268,15 +276,18 @@ function OrderItem({
               loading={isUpdating}
               variant="outline"
               colorPalette="red"
-              flex={1}
               size="sm"
             >
-              <X size={16} style={{ marginRight: '8px' }} />
+              <X size={16} />
               Rejeitar
             </Button>
-          </Flex>
+          </HStack>
+        ) : (
+          <Text fontSize="sm" color={tokens.textMuted}>
+            —
+          </Text>
         )}
-      </Stack>
-    </Box>
+      </Table.Cell>
+    </Table.Row>
   );
 }
