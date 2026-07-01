@@ -129,11 +129,11 @@ export default function ManagerAgendaPage() {
   }
 
   return (
-    <Box minH="100vh" py={12} px={6}>
+    <Box p="8">
       <Helmet>
         <title>Rabitto Pet Store — Agenda</title>
       </Helmet>
-      <Stack gap={8} maxW="1100px" mx="auto">
+      <Stack gap={8}>
         {}
         <Box>
           <Text fontSize="2xl" fontWeight="bold" color={tokens.textPrimary}>
