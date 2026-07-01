@@ -11,6 +11,7 @@ import {
   Flex,
   Heading,
   IconButton,
+  Image,
   Input,
   Stack,
   Text,
@@ -20,6 +21,7 @@ import { loginSchema, type LoginFormData } from './schema/login.schema';
 import { useLogin } from '../../services/auth/queries';
 import { authService } from '../../services/auth/storage';
 import { tokens } from '../../styles/tokens';
+import rabittoLogo from '../../assets/rabitto-logo.png';
 
 
 
@@ -109,43 +111,19 @@ export default function LoginPage() {
         />
 
         {}
-        <Text
-          fontSize={{ base: '28px', md: '36px' }}
-          lineHeight="1"
-          userSelect="none"
-          filter="drop-shadow(0 0 16px oklch(0.73 0.08 65 / 0.45))"
-        >
-          🐾
-        </Text>
-
-        {}
         <Flex
           flex={{ md: '1' }}
-          direction={{ base: 'row', md: 'column' }}
-          align={{ base: 'baseline', md: 'flex-start' }}
+          direction="column"
+          align={{ base: 'center', md: 'flex-start' }}
           justify={{ base: 'flex-start', md: 'center' }}
-          gap={{ base: '2', md: '0' }}
+          gap="2"
         >
-          <Text
-            as="span"
-            fontSize={{ base: '26px', md: 'clamp(48px, 5.5vw, 78px)' }}
-            fontWeight="800"
-            color={tokens.textPrimary}
-            letterSpacing={{ base: '-0.5px', md: '-2.5px' }}
-            lineHeight={{ base: '1', md: '0.88' }}
-            mb={{ base: '0', md: '3' }}
-          >
-            Rabitto
-          </Text>
-          <Text
-            as="span"
-            fontSize={{ base: '13px', md: '17px' }}
-            fontWeight="600"
-            color="brand.500"
-            mb={{ base: '0', md: '4' }}
-          >
-            Pet Store
-          </Text>
+          <Image
+            src={rabittoLogo}
+            alt="Rabitto Pet Store"
+            w={{ base: '160px', md: '260px' }}
+            filter="drop-shadow(0 0 16px oklch(0.73 0.08 65 / 0.25))"
+          />
           <Text
             display={{ base: 'none', md: 'block' }}
             fontSize="10px"

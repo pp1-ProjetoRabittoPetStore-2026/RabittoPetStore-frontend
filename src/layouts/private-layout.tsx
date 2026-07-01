@@ -10,6 +10,7 @@ import {
   Flex,
   HStack,
   IconButton,
+  Image,
   Stack,
   Text,
 } from '@chakra-ui/react';
@@ -17,6 +18,7 @@ import { Calendar, CalendarDays, History, Home, LogOut, Menu, Stethoscope, Users
 import { useLogout } from '../services/auth/queries';
 import { authService, type Role } from '../services/auth/storage';
 import { tokens } from '../styles/tokens';
+import rabittoLogo from '../assets/rabitto-logo.png';
 
 const ALL_NAV_ITEMS: {
   label: string;
@@ -127,17 +129,12 @@ export default function PrivateLayout() {
 
           <HStack gap="2" textDecoration="none" asChild>
             <RouterLink to="/">
-              <Text
-                fontSize="17px"
-                lineHeight="1"
-                userSelect="none"
-                filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.4))"
-              >
-                🐾
-              </Text>
-              <Text fontWeight="800" fontSize="15px" color={tokens.accent} letterSpacing="-0.3px">
-                Rabitto
-              </Text>
+              <Image
+                src={rabittoLogo}
+                alt="Rabitto"
+                h="28px"
+                filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.3))"
+              />
             </RouterLink>
           </HStack>
         </HStack>
@@ -197,12 +194,12 @@ export default function PrivateLayout() {
             <DrawerBody p="5">
               <Flex justify="space-between" align="center" mb="8">
                 <HStack gap="2">
-                  <Text fontSize="18px" filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.4))">
-                    🐾
-                  </Text>
-                  <Text fontWeight="800" fontSize="15px" color={tokens.accent} letterSpacing="-0.3px">
-                    Rabitto
-                  </Text>
+                  <Image
+                    src={rabittoLogo}
+                    alt="Rabitto"
+                    h="26px"
+                    filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.3))"
+                  />
                 </HStack>
                 <IconButton
                   aria-label="Fechar menu"
