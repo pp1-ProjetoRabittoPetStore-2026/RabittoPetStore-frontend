@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Helmet } from 'react-helmet-async';
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { isAxiosError } from 'axios';
 import { Pencil, Trash2, Plus, ShieldAlert } from 'lucide-react';
 import {
+  Alert,
   Box,
   Button,
   Flex,
@@ -33,22 +36,47 @@ import {
   type Role,
 } from '@/services/employee/types';
 import { tokens } from '@/styles/tokens';
+import { MaskedInput } from '@/components/ui/masked-input';
+import { MASKS } from '@/components/ui/mask-presets';
 
-// Esquema de validação
-const employeeSchema = z.object({
-  nome: z.string().min(2, 'Nome muito curto'),
-  cargo: z.string().min(1, 'Selecione um cargo'),
-  cpf: z.string().min(11, 'CPF inválido'),
-  email: z
-    .string()
-    .email('E-mail inválido')
-    .optional()
-    .or(z.literal('')),
-  telefone: z.string().min(8, 'Telefone inválido'),
-  senha: z.string().optional(),
-});
+
+
+const employeeSchema = z
+  .object({
+    nome: z.string().min(2, 'Nome muito curto'),
+    cargo: z.string().min(1, 'Selecione um cargo'),
+    cpf: z.string().min(11, 'CPF inválido'),
+    email: z
+      .string()
+      .email('E-mail inválido')
+      .optional()
+      .or(z.literal('')),
+    telefone: z.string().min(8, 'Telefone inválido'),
+    senha: z.string().optional(),
+    confirmarSenha: z.string().optional(),
+  })
+  
+
+  .refine((d) => !d.senha || d.senha === d.confirmarSenha, {
+    message: 'As senhas não conferem',
+    path: ['confirmarSenha'],
+  });
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
+
+
+
+
+
+function getApiErrorMessage(error: unknown): string | null {
+  if (!error) return null;
+  if (isAxiosError(error)) {
+    const apiError = error.response?.data?.error;
+    if (typeof apiError === 'string' && apiError.trim()) return apiError;
+    if (!error.response) return 'Não foi possível conectar ao servidor.';
+  }
+  return 'Não foi possível salvar o funcionário. Tente novamente.';
+}
 
 const roles = createListCollection({
   items: [
@@ -72,17 +100,28 @@ export default function EmployeePage() {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     formState: { errors },
   } = useForm<EmployeeFormData>({
     resolver: zodResolver(employeeSchema),
   });
 
-  const selectedRole = watch('cargo') as Role;
+  const selectedRole = useWatch({ control, name: 'cargo' }) as Role;
+  const submitError = getApiErrorMessage(
+    createMutation.error ?? updateMutation.error,
+  );
 
   const openCreateModal = () => {
     setEditingEmployee(null);
-    reset({ nome: '', cargo: '', cpf: '', email: '', telefone: '', senha: '' });
+    reset({
+      nome: '',
+      cargo: '',
+      cpf: '',
+      email: '',
+      telefone: '',
+      senha: '',
+      confirmarSenha: '',
+    });
     setIsModalOpen(true);
   };
 
@@ -95,11 +134,14 @@ export default function EmployeePage() {
       email: emp.email ?? '',
       telefone: emp.telefone,
       senha: '',
+      confirmarSenha: '',
     });
     setIsModalOpen(true);
   };
 
-  const onSubmit = (data: EmployeeFormData) => {
+  
+
+  const onSubmit = ({ confirmarSenha: _, ...data }: EmployeeFormData) => {
     if (editingEmployee) {
       updateMutation.mutate(
         {
@@ -119,14 +161,16 @@ export default function EmployeePage() {
   };
 
   return (
-    <Box p="8" maxW="1280px" mx="auto">
-      {/* Header */}
+    <Box p="8">
+      <Helmet>
+        <title>Rabitto Pet Store — Funcionários</title>
+      </Helmet>
       <Flex justify="space-between" align="center" mb="8">
         <Box>
-          <Heading size="xl" color="gray.800">
+          <Heading size="2xl" color={tokens.textPrimary}>
             Equipe & Acessos
           </Heading>
-          <Text color="gray.500">
+          <Text color={tokens.textMuted} mt={1}>
             Gerencie funcionários, cargos e permissões do sistema.
           </Text>
         </Box>
@@ -135,7 +179,7 @@ export default function EmployeePage() {
         </Button>
       </Flex>
 
-      {/* Tabela com Sticky Header (Chakra v3 Pattern) */}
+      {}
       <Box
         rounded="xl"
         overflow="hidden"
@@ -236,7 +280,7 @@ export default function EmployeePage() {
         </Table.ScrollArea>
       </Box>
 
-      {/* Modal Refatorado para Dialog do Chakra v3 */}
+      {}
       <Dialog.Root
         open={isModalOpen}
         onOpenChange={(e) => setIsModalOpen(e.open)}
@@ -252,6 +296,15 @@ export default function EmployeePage() {
             <Dialog.Body>
               <form id="employee-form" onSubmit={handleSubmit(onSubmit)}>
                 <Stack gap="4">
+                  {submitError && (
+                    <Alert.Root status="error" borderRadius="md">
+                      <Alert.Indicator />
+                      <Alert.Content>
+                        <Alert.Title>{submitError}</Alert.Title>
+                      </Alert.Content>
+                    </Alert.Root>
+                  )}
+
                   <Field.Root invalid={!!errors.nome}>
                     <Field.Label>Nome Completo</Field.Label>
                     <Input
@@ -304,15 +357,17 @@ export default function EmployeePage() {
                   <HStack gap="4">
                     <Field.Root invalid={!!errors.cpf}>
                       <Field.Label>CPF</Field.Label>
-                      <Input
+                      <MaskedInput
                         {...register('cpf')}
+                        {...MASKS.cpf}
                         placeholder="000.000.000-00"
                       />
                     </Field.Root>
                     <Field.Root invalid={!!errors.telefone}>
                       <Field.Label>Telefone</Field.Label>
-                      <Input
+                      <MaskedInput
                         {...register('telefone')}
+                        {...MASKS.telefone}
                         placeholder="(81) 99999-9999"
                       />
                     </Field.Root>
@@ -342,6 +397,14 @@ export default function EmployeePage() {
                         : 'Senha de acesso inicial'}
                     </Field.HelperText>
                   </Field.Root>
+
+                  <Field.Root invalid={!!errors.confirmarSenha}>
+                    <Field.Label>Confirmar Senha</Field.Label>
+                    <Input type="password" {...register('confirmarSenha')} />
+                    <Field.ErrorText>
+                      {errors.confirmarSenha?.message}
+                    </Field.ErrorText>
+                  </Field.Root>
                 </Stack>
               </form>
             </Dialog.Body>
@@ -365,7 +428,8 @@ export default function EmployeePage() {
   );
 }
 
-// Helper para cores de badge
+
+
 const getRoleColor = (role: string) => {
   const colors: Record<string, string> = {
     GERENTE: 'purple',

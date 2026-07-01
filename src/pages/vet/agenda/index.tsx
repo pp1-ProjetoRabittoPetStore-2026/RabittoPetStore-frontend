@@ -1,5 +1,6 @@
 'use client';
 
+import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
 import {
   Box,
@@ -18,20 +19,25 @@ import { useColorModeValue } from '@/components/ui/color-mode';
 import { useVetAgenda } from '@/services/vet/queries';
 import type { Agendamento } from '@/services/agendamentos/types';
 
-// yyyy-MM-dd no fuso local
+
+
 function todayISO(): string {
   const now = new Date();
   const offset = now.getTimezoneOffset() * 60000;
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
-// Agenda médica dedicada: apenas a aba "Consultas" do veterinário autenticado.
+
+
 export default function VetAgendaPage() {
   const [data, setData] = useState<string>(todayISO());
   const { data: consultas = [], isLoading, error } = useVetAgenda(data);
 
   return (
     <Box minH="100vh" py={12} px={6}>
+      <Helmet>
+        <title>Rabitto Pet Store — Consultas</title>
+      </Helmet>
       <Stack gap={8} maxW="760px" mx="auto">
         <Flex
           justifyContent="space-between"
@@ -139,7 +145,7 @@ function ConsultaRow({ agendamento }: { agendamento: Agendamento }) {
             <Box>
               <Text fontWeight="medium">{agendamento.pet.nome}</Text>
               <Text fontSize="xs" color="gray.500">
-                {agendamento.servico.nome}
+                {agendamento.servicos.map((s) => s.nome).join(', ')}
               </Text>
             </Box>
           </HStack>

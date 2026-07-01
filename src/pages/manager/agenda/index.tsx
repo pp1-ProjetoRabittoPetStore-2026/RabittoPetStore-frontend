@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Stack,
@@ -11,38 +12,99 @@ import {
   Badge,
   HStack,
   Input,
-  Table,
+  SimpleGrid,
+  Portal,
+  Select,
+  createListCollection,
+  type ListCollection,
 } from '@chakra-ui/react';
+
+type SelectItem = { label: string; value: string };
 import {
   CalendarDays,
   Clock,
   PawPrint,
   Stethoscope,
+  Search,
+  Users,
 } from 'lucide-react';
 
 import { useAgenda } from '@/services/agenda/queries';
+import { useEmployees } from '@/services/employee/queries';
 import type { AgendaFuncionario } from '@/services/agenda/types';
 import { tokens } from '@/styles/tokens';
 
-// yyyy-MM-dd no fuso local (input type=date e @RequestParam LocalDate)
 function todayISO(): string {
   const now = new Date();
   const offset = now.getTimezoneOffset() * 60000;
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
+function isVetCargo(cargo?: string): boolean {
+  return (cargo ?? '').toLowerCase().includes('veterin');
+}
+
+function isTosadorCargo(cargo?: string): boolean {
+  const c = (cargo ?? '').toLowerCase();
+  return c.includes('tosad') || c.includes('banhist');
+}
+
 export default function ManagerAgendaPage() {
   const [data, setData] = useState<string>(todayISO());
-  const { data: agenda = [], isLoading, error } = useAgenda(data);
+  const [cargo, setCargo] = useState<string[]>(['']);
+  const [status, setStatus] = useState<string[]>(['']);
+  const [profissional, setProfissional] = useState<string[]>(['']);
+  const [nome, setNome] = useState<string>('');
+
+  const { data: employees = [] } = useEmployees();
+
+  const {
+    data: agenda = [],
+    isLoading,
+    error,
+  } = useAgenda({
+    data,
+    cargo: cargo[0] || undefined,
+    status: status[0] || undefined,
+    nome: nome || undefined,
+  });
+
+
+  const profissionalOptions = useMemo(() => {
+    const items = employees
+      .filter((e) => e.ativo !== false)
+      .filter((e) => isVetCargo(e.cargo) || isTosadorCargo(e.cargo))
+      .map((e) => ({ label: e.nome, value: String(e.id) }));
+    return createListCollection({
+      items: [{ label: 'Todos os profissionais', value: '' }, ...items],
+    });
+  }, [employees]);
+
+
+  const agendaFiltrada = useMemo(() => {
+    const selectedId = profissional[0];
+    if (!selectedId) return agenda;
+    return agenda.filter(
+      (item) => String(item.funcionario.id) === selectedId,
+    );
+  }, [agenda, profissional]);
+
+  const totalAtendimentos = useMemo(
+    () => agendaFiltrada.reduce((sum, i) => sum + i.agendamentos.length, 0),
+    [agendaFiltrada],
+  );
 
   return (
     <Box minH="100vh" py={12} px={6}>
-      <Stack gap={8} maxW="900px" mx="auto">
-        {/* Cabeçalho e seletor de data */}
+      <Helmet>
+        <title>Rabitto Pet Store — Agenda</title>
+      </Helmet>
+      <Stack gap={8} maxW="1100px" mx="auto">
+        {}
         <Flex
           justifyContent="space-between"
-          alignItems="center"
-          wrap="wrap"
+          alignItems={{ base: 'flex-start', md: 'center' }}
+          direction={{ base: 'column', md: 'row' }}
           gap={4}
         >
           <Box>
@@ -50,26 +112,114 @@ export default function ManagerAgendaPage() {
               Agenda da Equipe
             </Text>
             <Text fontSize="sm" color={tokens.textMuted}>
-              Atendimentos por funcionário (09h–17h)
+              {totalAtendimentos} atendimento{totalAtendimentos === 1 ? '' : 's'}{' '}
+              • {agendaFiltrada.length} profissional
+              {agendaFiltrada.length === 1 ? '' : 'is'} (09h–17h)
             </Text>
           </Box>
 
-          <HStack gap={2}>
+          <HStack
+            gap={2}
+            px={3}
+            py={1}
+            rounded="lg"
+            borderWidth="1px"
+            borderColor={tokens.inputBorder}
+            bg={tokens.inputBg}
+          >
             <CalendarDays size={18} color={tokens.textMuted} />
             <Input
               type="date"
               size="sm"
-              width="180px"
-              value={data}
-              bg={tokens.inputBg}
-              borderColor={tokens.inputBorder}
+              width="170px"
+              variant="subtle"
+              bg="transparent"
+              border="none"
+              px={0}
               color={tokens.textPrimary}
+              value={data}
               onChange={(e) => setData(e.target.value)}
+              _focusVisible={{ outline: 'none', boxShadow: 'none' }}
             />
           </HStack>
         </Flex>
 
-        {/* Conteúdo */}
+        {}
+        <Flex
+          wrap="wrap"
+          gap={3}
+          alignItems="center"
+          p={4}
+          rounded="xl"
+          bg={tokens.panelBg}
+          borderWidth="1px"
+          borderColor={tokens.panelBorder}
+        >
+          <HStack
+            gap={2}
+            px={3}
+            rounded="md"
+            borderWidth="1px"
+            borderColor={tokens.inputBorder}
+            bg={tokens.inputBg}
+            width={{ base: 'full', md: '240px' }}
+          >
+            <Search size={16} color={tokens.textMuted} />
+            <Input
+              placeholder="Buscar funcionário..."
+              size="sm"
+              variant="subtle"
+              bg="transparent"
+              border="none"
+              px={0}
+              color={tokens.textPrimary}
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              _focusVisible={{ outline: 'none', boxShadow: 'none' }}
+            />
+          </HStack>
+
+          <FilterSelect
+            collection={profissionalOptions}
+            value={profissional}
+            onChange={setProfissional}
+            placeholder="Profissional"
+            width="220px"
+          />
+
+          <FilterSelect
+            collection={cargoOptions}
+            value={cargo}
+            onChange={setCargo}
+            placeholder="Cargo"
+            width="180px"
+          />
+
+          <FilterSelect
+            collection={statusOptions}
+            value={status}
+            onChange={setStatus}
+            placeholder="Status"
+            width="180px"
+          />
+
+          <Button
+            size="sm"
+            variant="ghost"
+            color={tokens.textMuted}
+            onClick={() => {
+              setCargo(['']);
+              setStatus(['']);
+              setProfissional(['']);
+              setNome('');
+              setData(todayISO());
+            }}
+          >
+            Limpar filtros
+          </Button>
+        </Flex>
+
+        {}
         {isLoading ? (
           <Box textAlign="center" py={10}>
             <Spinner size="lg" />
@@ -88,7 +238,7 @@ export default function ManagerAgendaPage() {
               Tentar novamente
             </Button>
           </Box>
-        ) : agenda.length === 0 ? (
+        ) : agendaFiltrada.length === 0 ? (
           <Box
             textAlign="center"
             py={20}
@@ -97,126 +247,193 @@ export default function ManagerAgendaPage() {
             borderColor={tokens.panelBorder}
             borderRadius="xl"
           >
+            <Flex justify="center" mb={3} color={tokens.textMuted}>
+              <Users size={32} />
+            </Flex>
             <Text fontSize="xl" color={tokens.textMuted}>
-              Nenhum funcionário disponível
+              Nenhum profissional encontrado
             </Text>
             <Text fontSize="sm" color={tokens.textMuted}>
-              Não há veterinários ou banhistas ativos para esta data
+              Ajuste os filtros ou selecione outra data
             </Text>
           </Box>
         ) : (
-          <Box
-            rounded="xl"
-            overflow="hidden"
-            bg={tokens.panelBg}
-            borderWidth="1px"
-            borderColor={tokens.panelBorder}
-            color={tokens.textPrimary}
-          >
-            <Table.ScrollArea>
-              <Table.Root
-                size="md"
-                bg="transparent"
-                css={{
-                  '& td, & th': {
-                    bg: 'transparent',
-                    borderColor: tokens.panelBorder,
-                  },
-                  '& tbody tr': { bg: 'transparent' },
-                  '& tbody tr:hover': { bg: tokens.panelBorder },
-                }}
-              >
-                <Table.Header>
-                  <Table.Row bg={tokens.panelBorder}>
-                    <Table.ColumnHeader color={tokens.textMuted}>Funcionário</Table.ColumnHeader>
-                    <Table.ColumnHeader color={tokens.textMuted}>Cargo</Table.ColumnHeader>
-                    <Table.ColumnHeader color={tokens.textMuted}>Atendimentos</Table.ColumnHeader>
-                    <Table.ColumnHeader color={tokens.textMuted}>Horários</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {agenda.map((item) => (
-                    <FuncionarioRow key={item.funcionario.id} item={item} />
-                  ))}
-                </Table.Body>
-              </Table.Root>
-            </Table.ScrollArea>
-          </Box>
+          <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap={4}>
+            {agendaFiltrada.map((item) => (
+              <FuncionarioCard key={item.funcionario.id} item={item} />
+            ))}
+          </SimpleGrid>
         )}
       </Stack>
     </Box>
   );
 }
 
-interface FuncionarioRowProps {
+interface FilterSelectProps {
+  collection: ListCollection<SelectItem>;
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder: string;
+  width: string;
+}
+
+function FilterSelect({
+  collection,
+  value,
+  onChange,
+  placeholder,
+  width,
+}: FilterSelectProps) {
+  return (
+    <Select.Root
+      collection={collection}
+      size="sm"
+      width={{ base: 'full', md: width }}
+      value={value}
+      onValueChange={(details) => onChange(details.value)}
+    >
+      <Select.Control>
+        <Select.Trigger
+          bg={tokens.inputBg}
+          borderColor={tokens.inputBorder}
+          color={tokens.textPrimary}
+        >
+          <Select.ValueText placeholder={placeholder} />
+        </Select.Trigger>
+      </Select.Control>
+      <Portal>
+        <Select.Positioner>
+          <Select.Content>
+            {collection.items.map((item) => (
+              <Select.Item item={item} key={item.value}>
+                {item.label}
+                <Select.ItemIndicator />
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Positioner>
+      </Portal>
+    </Select.Root>
+  );
+}
+
+const cargoOptions = createListCollection({
+  items: [
+    { label: 'Todos os cargos', value: '' },
+    { label: 'Veterinário', value: 'VETERINARIO' },
+    { label: 'Tosador', value: 'TOSADOR' },
+  ],
+});
+
+const statusOptions = createListCollection({
+  items: [
+    { label: 'Todos os status', value: '' },
+    { label: 'Pendente', value: 'Pendente' },
+    { label: 'Aguardando', value: 'Aguardando' },
+    { label: 'Em Serviço', value: 'Em Serviço' },
+    { label: 'Pronto', value: 'Pronto' },
+    { label: 'Confirmado', value: 'Confirmado' },
+    { label: 'Cancelado', value: 'Cancelado' },
+    { label: 'Rejeitado', value: 'Rejeitado' },
+  ],
+});
+
+interface FuncionarioCardProps {
   item: AgendaFuncionario;
 }
 
-function FuncionarioRow({ item }: FuncionarioRowProps) {
+function FuncionarioCard({ item }: FuncionarioCardProps) {
   const { funcionario, agendamentos } = item;
-
-  const isVet = (funcionario.cargo ?? '')
-    .toLowerCase()
-    .includes('veterin');
+  const isVet = isVetCargo(funcionario.cargo);
 
   return (
-    <Table.Row>
-      <Table.Cell>
+    <Box
+      rounded="xl"
+      bg={tokens.panelBg}
+      borderWidth="1px"
+      borderColor={tokens.panelBorder}
+      color={tokens.textPrimary}
+      p={5}
+      transition="transform 0.15s, box-shadow 0.15s"
+      _hover={{ transform: 'translateY(-2px)', shadow: 'md' }}
+    >
+      {}
+      <Flex justify="space-between" align="center" mb={4}>
         <HStack gap={3}>
-          {isVet ? <Stethoscope size={18} /> : <PawPrint size={18} />}
-          <Text fontWeight="medium">{funcionario.nome}</Text>
+          <Flex
+            w={9}
+            h={9}
+            rounded="full"
+            align="center"
+            justify="center"
+            bg={isVet ? 'blue.subtle' : 'orange.subtle'}
+            color={isVet ? 'blue.fg' : 'orange.fg'}
+          >
+            {isVet ? <Stethoscope size={18} /> : <PawPrint size={18} />}
+          </Flex>
+          <Box>
+            <Text fontWeight="semibold" lineHeight="1.2">
+              {funcionario.nome}
+            </Text>
+            <Text fontSize="xs" color={tokens.textMuted}>
+              {funcionario.cargo}
+            </Text>
+          </Box>
         </HStack>
-      </Table.Cell>
-      <Table.Cell>
-        <Text fontSize="sm" color={tokens.textMuted}>
-          {funcionario.cargo}
-        </Text>
-      </Table.Cell>
-      <Table.Cell>
         <Badge
           variant="subtle"
           colorPalette={agendamentos.length > 0 ? 'blue' : 'gray'}
         >
-          {agendamentos.length}{' '}
-          {agendamentos.length === 1 ? 'agendamento' : 'agendamentos'}
+          {agendamentos.length}
         </Badge>
-      </Table.Cell>
-      <Table.Cell>
-        {agendamentos.length === 0 ? (
-          <Text fontSize="sm" color={tokens.textMuted}>
-            —
-          </Text>
-        ) : (
-          <HStack gap={2} wrap="wrap">
-            {agendamentos.map((ag) => (
-              <HStack
-                key={ag.id}
-                gap={1}
-                px={2}
-                py={1}
-                rounded="md"
-                borderWidth="1px"
-                borderColor={tokens.panelBorder}
-                color={tokens.textMuted}
-              >
-                <Clock size={12} />
-                <Text fontSize="xs" fontWeight="medium">
+      </Flex>
+
+      {}
+      {agendamentos.length === 0 ? (
+        <Text
+          fontSize="sm"
+          color={tokens.textMuted}
+          textAlign="center"
+          py={3}
+        >
+          Sem atendimentos
+        </Text>
+      ) : (
+        <Stack gap={2}>
+          {agendamentos.map((ag) => (
+            <Flex
+              key={ag.id}
+              align="center"
+              justify="space-between"
+              gap={2}
+              px={3}
+              py={2}
+              rounded="md"
+              borderWidth="1px"
+              borderColor={tokens.panelBorder}
+            >
+              <HStack gap={2} minW={0}>
+                <Clock size={13} color={tokens.textMuted} />
+                <Text fontSize="xs" fontWeight="medium" whiteSpace="nowrap">
                   {formatHora(ag.dataHora)}
                 </Text>
-                <Text fontSize="xs">· {ag.pet.nome}</Text>
-                <Badge
-                  size="sm"
-                  variant="subtle"
-                  colorPalette={getBadgePalette(ag.status)}
-                >
-                  {ag.status}
-                </Badge>
+                <Text fontSize="xs" color={tokens.textMuted} truncate>
+                  {ag.pet.nome}
+                  {ag.pet.tutor?.nome ? ` · ${ag.pet.tutor.nome}` : ''}
+                </Text>
               </HStack>
-            ))}
-          </HStack>
-        )}
-      </Table.Cell>
-    </Table.Row>
+              <Badge
+                size="sm"
+                variant="subtle"
+                colorPalette={getBadgePalette(ag.status)}
+              >
+                {ag.status}
+              </Badge>
+            </Flex>
+          ))}
+        </Stack>
+      )}
+    </Box>
   );
 }
 
@@ -239,6 +456,7 @@ function getBadgePalette(status: string): string {
     case 'Confirmado':
       return 'green';
     case 'Cancelado':
+    case 'Rejeitado':
       return 'red';
     default:
       return 'gray';

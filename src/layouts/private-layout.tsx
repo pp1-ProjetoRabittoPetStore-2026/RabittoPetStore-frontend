@@ -13,7 +13,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { Activity, Calendar, CalendarDays, Home, LogOut, Menu, Stethoscope, Users, X } from 'lucide-react';
+import { Calendar, CalendarDays, History, Home, LogOut, Menu, Stethoscope, Users, X } from 'lucide-react';
 import { useLogout } from '../services/auth/queries';
 import { authService, type Role } from '../services/auth/storage';
 import { tokens } from '../styles/tokens';
@@ -28,7 +28,7 @@ const ALL_NAV_ITEMS: {
   { label: 'Agendamentos',     path: '/manager/orders',   icon: Calendar,     roles: ['GERENTE'] },
   { label: 'Agenda',           path: '/manager/agenda',   icon: CalendarDays, roles: ['GERENTE'] },
   { label: 'Funcionários',     path: '/manager/employee', icon: Users,        roles: ['GERENTE'] },
-  { label: 'Status dos Pets',  path: '/pets/status',      icon: Activity,     roles: ['GERENTE', 'TOSADOR'] },
+  { label: 'Histórico',        path: '/pets/history',     icon: History,      roles: ['GERENTE', 'TOSADOR'] },
   { label: 'Minhas Consultas', path: '/vet/agenda',       icon: Stethoscope,  roles: ['VETERINARIO'] },
 ];
 
@@ -45,8 +45,7 @@ function NavLink({ label, path, icon: Icon, onClick }: NavLinkProps) {
 
   return (
     <Box
-      as={RouterLink}
-      to={path}
+      asChild
       onClick={onClick}
       display="flex"
       alignItems="center"
@@ -63,8 +62,10 @@ function NavLink({ label, path, icon: Icon, onClick }: NavLinkProps) {
       transition="color 120ms ease-out, background 120ms ease-out"
       whiteSpace="nowrap"
     >
-      <Icon size={15} />
-      {label}
+      <RouterLink to={path}>
+        <Icon size={15} />
+        {label}
+      </RouterLink>
     </Box>
   );
 }
@@ -95,7 +96,7 @@ export default function PrivateLayout() {
       bg={tokens.pageBg}
       fontFamily="Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     >
-      {/* Navbar */}
+      {}
       <Flex
         as="header"
         h="56px"
@@ -110,7 +111,7 @@ export default function PrivateLayout() {
         zIndex="10"
         flexShrink="0"
       >
-        {/* Logo + hamburger */}
+        {}
         <HStack gap="3">
           <IconButton
             aria-label="Abrir menu"
@@ -124,29 +125,31 @@ export default function PrivateLayout() {
             <Menu size={18} />
           </IconButton>
 
-          <HStack gap="2" as={RouterLink} to="/" textDecoration="none">
-            <Text
-              fontSize="17px"
-              lineHeight="1"
-              userSelect="none"
-              filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.4))"
-            >
-              🐾
-            </Text>
-            <Text fontWeight="800" fontSize="15px" color={tokens.accent} letterSpacing="-0.3px">
-              Rabitto
-            </Text>
+          <HStack gap="2" textDecoration="none" asChild>
+            <RouterLink to="/">
+              <Text
+                fontSize="17px"
+                lineHeight="1"
+                userSelect="none"
+                filter="drop-shadow(0 0 8px oklch(0.73 0.08 65 / 0.4))"
+              >
+                🐾
+              </Text>
+              <Text fontWeight="800" fontSize="15px" color={tokens.accent} letterSpacing="-0.3px">
+                Rabitto
+              </Text>
+            </RouterLink>
           </HStack>
         </HStack>
 
-        {/* Desktop nav links */}
+        {}
         <HStack gap="1" display={{ base: 'none', md: 'flex' }}>
           {navItems.map((item) => (
             <NavLink key={item.path} {...item} />
           ))}
         </HStack>
 
-        {/* Logout */}
+        {}
         <Box
           as="button"
           onClick={handleLogout}
@@ -172,12 +175,12 @@ export default function PrivateLayout() {
         </Box>
       </Flex>
 
-      {/* Content */}
+      {}
       <Box flex="1" overflow="auto" p={{ base: '5', md: '8' }}>
         <Outlet />
       </Box>
 
-      {/* Mobile drawer */}
+      {}
       <DrawerRoot
         open={drawerOpen}
         placement="start"

@@ -1,5 +1,6 @@
 'use client';
 
+import { Helmet } from 'react-helmet-async';
 import { useState } from 'react';
 import {
   Box,
@@ -24,10 +25,12 @@ import {
 import type { Agendamento, ServicoStatus } from '@/services/agendamentos/types';
 
 export default function ManagerOrdersPage() {
-  // Estado para o filtro (Chakra v3 Select usa array de strings para o value)
+  
+
   const [statusFilter, setStatusFilter] = useState<string[]>(['Pendente']);
 
-  // Hook de busca usando o status selecionado no filtro
+  
+
   const currentStatus = statusFilter[0] as ServicoStatus;
   const {
     data: agendamentos = [],
@@ -61,8 +64,11 @@ export default function ManagerOrdersPage() {
 
   return (
     <Box minH="100vh" py={12} px={6}>
+      <Helmet>
+        <title>Rabitto Pet Store — Agendamentos</title>
+      </Helmet>
       <Stack gap={8} maxW="800px" mx="auto">
-        {/* Cabeçalho e Filtro */}
+        {}
         <Flex
           justifyContent="space-between"
           alignItems="center"
@@ -103,7 +109,7 @@ export default function ManagerOrdersPage() {
           </Select.Root>
         </Flex>
 
-        {/* Área de Conteúdo */}
+        {}
         {isLoading ? (
           <Box textAlign="center" py={10}>
             <Spinner size="lg" />
@@ -155,7 +161,8 @@ export default function ManagerOrdersPage() {
   );
 }
 
-// Configuração das opções do Select
+
+
 const statusOptions = createListCollection({
   items: [
     { label: 'Pendente', value: 'Pendente' },
@@ -181,7 +188,8 @@ function OrderItem({
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
-  // Cores dinâmicas para o Badge baseadas no status
+  
+
   const getBadgePalette = (status: string) => {
     switch (status) {
       case 'Pendente':
@@ -216,6 +224,9 @@ function OrderItem({
           <Text fontSize="lg" fontWeight="bold">
             Pet: {agendamento.pet.nome}
           </Text>
+          <Text fontSize="sm" color="gray.600">
+            Cliente: {agendamento.pet.tutor?.nome ?? 'Não informado'}
+          </Text>
           <Text fontSize="sm" color="gray.500">
             {new Date(agendamento.dataHora).toLocaleString('pt-BR')} •{' '}
             {agendamento.pet.raca}
@@ -229,17 +240,17 @@ function OrderItem({
       <Stack gap={3} borderTopWidth="1px" pt={4} borderColor={borderColor}>
         <Flex justifyContent="space-between" alignItems="center">
           <Box>
-            <Text fontWeight="medium">{agendamento.servico.nome}</Text>
+            <Text fontWeight="medium">{agendamento.servicos.map((s) => s.nome).join(', ')}</Text>
             <Text fontSize="xs" color="gray.500">
               Preço do serviço
             </Text>
           </Box>
           <Text fontWeight="bold" fontSize="lg" color="green.600">
-            R$ {agendamento.servico.preco.toFixed(2)}
+            R$ {agendamento.servicos.reduce((total, s) => total + (s.preco ?? 0), 0).toFixed(2)}
           </Text>
         </Flex>
 
-        {/* Só exibe botões de ação se o status for Pendente */}
+        {}
         {agendamento.status === 'Pendente' && (
           <Flex gap={3} mt={2}>
             <Button

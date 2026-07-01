@@ -11,13 +11,15 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Interceptor de REQUISIÇÃO: Adiciona o token no Header
+
+
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = authService.getToken();
 
     if (token && config.headers) {
-      // Padrão Bearer Token
+      
+
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -28,16 +30,33 @@ api.interceptors.request.use(
   },
 );
 
-// Interceptor de RESPOSTA: Trata erros globais (ex: 401 Unauthorized)
+
+
+
+
+
+
+
+
+
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Se a API retornar 401, o token expirou ou é inválido
-    if (error.response && error.response.status === 401) {
+    const status = error.response?.status;
+    const url = error.config?.url ?? '';
+
+    
+
+    if (status === 401 && !url.includes('/auth/')) {
       authService.removeToken();
 
-      // Opcional: Redirecionar para o login
-      // window.location.href = '/login';
+      if (
+        typeof window !== 'undefined' &&
+        window.location.pathname !== '/login'
+      ) {
+        window.location.href = '/login';
+      }
     }
 
     return Promise.reject(error);

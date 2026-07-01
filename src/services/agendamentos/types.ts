@@ -14,6 +14,13 @@ export interface Servico {
   preco: number;
 }
 
+export interface Tutor {
+  id: number;
+  nome: string;
+  email?: string;
+  telefone?: string;
+}
+
 export interface Pet {
   id: number;
   nome: string;
@@ -21,6 +28,7 @@ export interface Pet {
   porte: string;
   especie: string;
   idade: number;
+  tutor?: Tutor;
 }
 
 export interface Agendamento {
@@ -28,5 +36,5 @@ export interface Agendamento {
   dataHora: string;
   status: ServicoStatus;
   pet: Pet;
-  servico: Servico;
+  servicos: Servico[];
 }

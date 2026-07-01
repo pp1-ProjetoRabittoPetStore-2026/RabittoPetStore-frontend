@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router';
 import { useForm } from 'react-hook-form';
+import { isAxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
@@ -18,6 +20,17 @@ import { loginSchema, type LoginFormData } from './schema/login.schema';
 import { useLogin } from '../../services/auth/queries';
 import { authService } from '../../services/auth/storage';
 import { tokens } from '../../styles/tokens';
+
+
+
+function getLoginErrorMessage(error: unknown): string {
+  if (isAxiosError(error)) {
+    const apiError = error.response?.data?.error;
+    if (typeof apiError === 'string' && apiError.trim()) return apiError;
+    if (!error.response) return 'Não foi possível conectar ao servidor.';
+  }
+  return 'Credenciais inválidas. Tente novamente.';
+}
 
 const inputStyles = {
   bg: tokens.inputBg,
@@ -66,7 +79,9 @@ export default function LoginPage() {
       direction={{ base: 'column', md: 'row' }}
       fontFamily="Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     >
-      {/* Brand column */}
+      <Helmet>
+        <title>Rabitto Pet Store — Entrar</title>
+      </Helmet>
       <Flex
         w={{ base: 'full', md: '42%' }}
         bg={tokens.panelBg}
@@ -81,7 +96,7 @@ export default function LoginPage() {
         position="relative"
         overflow="hidden"
       >
-        {/* Ambient glow */}
+        {}
         <Box
           display={{ base: 'none', md: 'block' }}
           position="absolute"
@@ -93,7 +108,7 @@ export default function LoginPage() {
           pointerEvents="none"
         />
 
-        {/* Paw */}
+        {}
         <Text
           fontSize={{ base: '28px', md: '36px' }}
           lineHeight="1"
@@ -103,7 +118,7 @@ export default function LoginPage() {
           🐾
         </Text>
 
-        {/* Wordmark */}
+        {}
         <Flex
           flex={{ md: '1' }}
           direction={{ base: 'row', md: 'column' }}
@@ -143,7 +158,7 @@ export default function LoginPage() {
           </Text>
         </Flex>
 
-        {/* Gold rule */}
+        {}
         <Box
           display={{ base: 'none', md: 'block' }}
           w="40px"
@@ -153,7 +168,7 @@ export default function LoginPage() {
         />
       </Flex>
 
-      {/* Form column */}
+      {}
       <Flex
         flex="1"
         bg={tokens.pageBg}
@@ -253,7 +268,7 @@ export default function LoginPage() {
                   color={tokens.errorText}
                   lineHeight="1.4"
                 >
-                  Credenciais inválidas. Tente novamente.
+                  {getLoginErrorMessage(error)}
                 </Box>
               )}
 
