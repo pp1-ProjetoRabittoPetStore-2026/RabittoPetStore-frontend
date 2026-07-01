@@ -211,27 +211,40 @@ export default function ServicosPage() {
         <Dialog.Backdrop bg="blackAlpha.600" />
         <Dialog.Positioner>
           <Dialog.Content
-            rounded="2xl"
+            rounded="xl"
             p="6"
             bg={tokens.panelBg}
             color={tokens.textPrimary}
             borderWidth="1px"
             borderColor={tokens.panelBorder}
+            shadow="lg"
             css={{
               '& input': {
                 bg: tokens.inputBg,
                 borderColor: tokens.inputBorder,
                 color: tokens.textPrimary,
+                borderRadius: '4px',
               },
-              '& input::placeholder': { color: tokens.textMuted },
+              '& input::placeholder': { color: 'oklch(0.58 0.04 80)' },
+              '& input:focus, & input:focus-visible': {
+                borderColor: tokens.accent,
+                boxShadow: `0 0 0 1px ${tokens.accent}`,
+                outline: 'none',
+              },
+              '& [data-part="label"]': { color: tokens.textPrimary, fontWeight: 500 },
+              '& [data-part="error-text"]': { color: tokens.errorText },
             }}
           >
-            <Dialog.Header>
-              <Dialog.Title fontSize="xl">
+            <Dialog.Header px="0" pt="0">
+              <Dialog.Title
+                fontSize="xl"
+                fontWeight="600"
+                color={tokens.textPrimary}
+              >
                 {editing ? 'Editar Serviço' : 'Cadastrar Serviço'}
               </Dialog.Title>
             </Dialog.Header>
-            <Dialog.Body>
+            <Dialog.Body px="0">
               <form id="servico-form" onSubmit={handleSubmit(onSubmit)}>
                 <Stack gap="4">
                   {submitError && (
@@ -281,9 +294,16 @@ export default function ServicosPage() {
                 </Stack>
               </form>
             </Dialog.Body>
-            <Dialog.Footer mt="6">
+            <Dialog.Footer mt="6" px="0" pb="0" gap="3">
               <Dialog.CloseTrigger asChild>
-                <Button variant="outline">Cancelar</Button>
+                <Button
+                  variant="outline"
+                  borderColor={tokens.inputBorder}
+                  color={tokens.textMuted}
+                  _hover={{ bg: tokens.panelBorder }}
+                >
+                  Cancelar
+                </Button>
               </Dialog.CloseTrigger>
               <Button
                 type="submit"
